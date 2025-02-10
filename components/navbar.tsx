@@ -86,7 +86,7 @@ export default function NavBar() {
         <ThemeSwitch />
         <Regbutton type="Login" variant="outline" />
         <Regbutton
-          type="Sign Up"
+          type="Signup"
           classname="bg-primary dark:bg-background-light dark:text-primary"
         />
       </div>
