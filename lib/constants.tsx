@@ -94,3 +94,60 @@ export const INTEGRATIONS = [
     icon: <Mail size={20} />,
   },
 ];
+
+
+export const CLUSTERS = [
+  {
+      id: 1,
+      name: "Project Reports",
+      visibility: "public"
+  },
+  {
+      id: 2,
+      name: "Marketing Materials",
+      visibility: "private"
+  },
+  {
+      id: 3,
+      name: "Legal Documents",
+      visibility: "public"
+  },
+  {
+      id: 4,
+      name: "Client Proposals",
+      visibility: "private"
+  }
+];
+
+export const DOCS = [
+  {
+      id: 1,
+      name: "Business Proposal",
+      type: "pdf",
+      logo: "/images/pdf_9496432.png"
+  },
+  {
+      id: 2,
+      name: "Marketing Plan",
+      type: "docx",
+      logo: "/images/Microsoft_Word-Logo.wine.png"
+  },
+  {
+      id: 3,
+      name: "Project Overview",
+      type: "pptx",
+      logo: "/images/Microsoft_PowerPoint-Logo.wine.png"
+  },
+  {
+      id: 4,
+      name: "Financial Report",
+      type: "xlsx",
+      logo: "/images/Microsoft_Excel-Logo.wine.png"
+  },
+  {
+      id: 5,
+      name: "User Guide",
+      type: "pdf",
+      logo: "/images/pdf_9496432.png"
+  }
+];

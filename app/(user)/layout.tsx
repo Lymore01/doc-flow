@@ -3,9 +3,10 @@ import { SidebarProvider, SidebarTrigger } from "../../components/ui/sidebar";
 import { BarChart, Folder, Home, Link, Settings } from "lucide-react";
 import AppSideBar from "../../components/app-sidebar";
 import ThemeSwitch from "../../components/theme";
+import { Separator } from "../../components/ui/separator";
 
 export const metadata: Metadata = {
-  title: "DocX",
+  title: "DocX | Dashboard",
   description: "User Dashboard",
 };
 
@@ -45,12 +46,13 @@ export default function UserRootLayout({
           },
         ]}
       />
-      <main className="flex-1">
+      <main className="flex-1 max-h-screen overflow-hidden">
         <div className="flex items-center justify-between p-2">
           <SidebarTrigger />
           <ThemeSwitch />
         </div>
-        <div className="px-4 py-2">{children}</div>
+        <Separator className="my--2"/>
+        <div className="">{children}</div>
       </main>
     </SidebarProvider>
   );

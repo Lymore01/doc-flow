@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: "class",
+  darkMode: ["class", "class"],
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -16,21 +16,18 @@ module.exports = {
   		},
   		colors: {
   			primary: {
-  				DEFAULT: 'var(--primary)',
+  				DEFAULT: 'hsl(var(--primary))',
   				foreground: 'hsl(var(--primary-foreground))'
   			},
   			secondary: {
   				DEFAULT: 'hsl(var(--secondary))',
   				foreground: 'hsl(var(--secondary-foreground))'
   			},
-			background:{
-				DEFAULT: 'hsl(var(--background))',
-				light:'var(--background-light)'
-			},
+  			background: 'hsl(var(--background))',
   			card: {
   				DEFAULT: 'hsl(var(--card))',
   				foreground: 'hsl(var(--card-foreground))',
-				dark: 'var(--card-dark)'
+  				dark: 'var(--card-dark)'
   			},
   			text: {
   				primary: 'var(--text-primary-light)',
@@ -38,7 +35,7 @@ module.exports = {
   			},
   			error: 'var(--error)',
   			warning: 'var(--warning)',
-  			info: 'var(--info)',
+  			info: 'hsl(var(--info))',
   			foreground: 'hsl(var(--foreground))',
   			popover: {
   				DEFAULT: 'hsl(var(--popover))',
@@ -64,7 +61,7 @@ module.exports = {
   				'2': 'hsl(var(--chart-2))',
   				'3': 'hsl(var(--chart-3))',
   				'4': 'hsl(var(--chart-4))',
-  				'5': 'hsl(var(--chart-5))'
+  				'5': 'hsl(var(--chart-5))',
   			},
   			sidebar: {
   				DEFAULT: 'hsl(var(--sidebar-background))',
@@ -75,7 +72,7 @@ module.exports = {
   				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))',
-				dark:'hsl(var(--sidebar-background-dark))'
+  				dark: 'hsl(var(--sidebar-background-dark))'
   			}
   		},
   		borderRadius: {
@@ -86,6 +83,28 @@ module.exports = {
   		},
   		boxShadow: {
   			soft: '0px 4px 6px rgba(0, 0, 0, 0.1)'
+  		},
+  		keyframes: {
+  			'accordion-down': {
+  				from: {
+  					height: '0'
+  				},
+  				to: {
+  					height: 'var(--radix-accordion-content-height)'
+  				}
+  			},
+  			'accordion-up': {
+  				from: {
+  					height: 'var(--radix-accordion-content-height)'
+  				},
+  				to: {
+  					height: '0'
+  				}
+  			}
+  		},
+  		animation: {
+  			'accordion-down': 'accordion-down 0.2s ease-out',
+  			'accordion-up': 'accordion-up 0.2s ease-out'
   		}
   	}
   },
