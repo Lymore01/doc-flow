@@ -7,19 +7,19 @@ import {
   ChevronDown,
   Clipboard,
   CopyIcon,
-  Edit,
   EllipsisVertical,
   RefreshCcw,
   Search,
   Trash,
 } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 import { DOCS } from "../../../../../lib/constants";
 import Image from "next/image";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../../../../../components/ui/dropdown-menu";
 import {
@@ -41,6 +41,7 @@ import MoveDocuments from "../../../../../components/move-documents";
 import { useToast } from "../../../../../hooks/use-toast";
 import { Input } from "../../../../../components/ui/input";
 import UploadDocument from "../../../../../components/upload-document";
+import EditDocument from "../../../../../components/edit-document";
 
 export default function ClusterPage({
   children,
@@ -50,6 +51,12 @@ export default function ClusterPage({
   const router = useRouter();
   const { clusterId } = useParams();
   const { toast } = useToast();
+  const [documentName, setDocumentName] = useState<string>("");
+
+  const filteredDocs = DOCS.filter((doc) =>
+    doc.name.toLowerCase().includes(documentName.toLowerCase())
+  );
+
   // TODO: fetch from db
   return (
     <div className="flex flex-col">
@@ -61,6 +68,10 @@ export default function ClusterPage({
             <Input
               placeholder="Search documents..."
               className="placeholder:text-sm border-none outline-none focus-visible:ring-0"
+              value={documentName}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                setDocumentName(event.target.value);
+              }}
             />
             <div className="p-2">
               <Search size={16} />
@@ -75,7 +86,7 @@ export default function ClusterPage({
             {/* refetch from the database */}
             <span>Reload</span>
           </Button>
-          
+
           {/* upload doc */}
           <UploadDocument />
           <Separator orientation="vertical" />
@@ -93,7 +104,7 @@ export default function ClusterPage({
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Get Url</DialogTitle>
-                <DialogDescription>Edit, Copy, Share 😘</DialogDescription>
+                <DialogDescription>This Url contains all the documents in cluster {clusterId}</DialogDescription>
               </DialogHeader>
               <Separator />
               <Accordion type="single" collapsible className="w-full">
@@ -147,51 +158,52 @@ export default function ClusterPage({
 
           <Separator />
           <div className="py-4 space-y-4">
-            {DOCS.map((doc) => (
-              <div key={doc.id}>
-                <div
-                  className="flex items-center justify-between gap-4 text-sm hover:font-semibold transition-all cursor-pointer pl-4"
-                  onClick={() => {
-                    router.push(
-                      `/dashboard/cluster/${clusterId}/document/${doc.id}`
-                    );
-                  }}
-                >
-                  <div className="flex items-center gap-2">
-                    <Image
-                      src={doc.logo}
-                      alt={doc.type}
-                      width={100}
-                      height={100}
-                      className="h-7 w-8"
-                    />
-                    <p>{doc.name}</p>
-                  </div>
-                  {/* actions */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <EllipsisVertical size={16} />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent side="right">
-                      <DropdownMenuItem>
-                        <span className="flex gap-2">
-                          <Edit size={16} />
-                          <span>Rename</span>
-                        </span>
-                      </DropdownMenuItem>
-                      <Separator className="my-2" />
-                      <DropdownMenuItem className="group">
-                        <span className="flex gap-2 w-full group-hover:text-[red]">
-                          <Trash size={16} />
-                          <span>Delete</span>
-                        </span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-                <Separator className="my-2" />
+            {filteredDocs.length === 0 ? (
+              <div className="p-4 flex items-center justify-center">
+                <span className="text-sm">Oops, Document Not Found!</span>
               </div>
-            ))}
+            ) : (
+              filteredDocs.map((doc) => (
+                <div key={doc.id}>
+                  <div
+                    className="flex items-center justify-between gap-4 text-sm hover:font-semibold transition-all cursor-pointer pl-4"
+                    onClick={() => {
+                      router.push(
+                        `/dashboard/cluster/${clusterId}/document/${doc.id}`
+                      );
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Image
+                        src={doc.logo}
+                        alt={doc.type}
+                        width={100}
+                        height={100}
+                        className="h-7 w-8"
+                      />
+                      <p>{doc.name}</p>
+                    </div>
+                    {/* actions */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <EllipsisVertical size={16} />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent side="right">
+                        <EditDocument documentName={doc.name} />
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="group">
+                          <span className="flex gap-2 w-full group-hover:text-[red]">
+                            <Trash size={16} />
+                            <span>Delete</span>
+                          </span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  <Separator className="my-2" />
+                </div>
+              ))
+            )}
           </div>
         </div>
         <Separator orientation="vertical" />

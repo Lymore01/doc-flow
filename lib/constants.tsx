@@ -122,31 +122,31 @@ export const CLUSTERS = [
 export const DOCS = [
   {
       id: 1,
-      name: "Business Proposal",
+      name: "Business Proposal.pdf",
       type: "pdf",
       logo: "/images/pdf_9496432.png"
   },
   {
       id: 2,
-      name: "Marketing Plan",
+      name: "Marketing Plan.docx",
       type: "docx",
       logo: "/images/Microsoft_Word-Logo.wine.png"
   },
   {
       id: 3,
-      name: "Project Overview",
+      name: "Project Overview.pptx",
       type: "pptx",
       logo: "/images/Microsoft_PowerPoint-Logo.wine.png"
   },
   {
       id: 4,
-      name: "Financial Report",
+      name: "Financial Report.xlsx",
       type: "xlsx",
       logo: "/images/Microsoft_Excel-Logo.wine.png"
   },
   {
       id: 5,
-      name: "User Guide",
+      name: "User Guide.pdf",
       type: "pdf",
       logo: "/images/pdf_9496432.png"
   }

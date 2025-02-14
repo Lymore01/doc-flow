@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { Edit, EllipsisVertical, Info, Search, Trash } from "lucide-react";
@@ -19,6 +20,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
 } from "../../../../components/ui/dropdown-menu";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import {
@@ -32,6 +34,7 @@ import AddClusterForm from "../../../../components/add-cluster-form";
 import Link from "next/link";
 import { Skeleton } from "../../../../components/ui/skeleton";
 import { useEffect, useState } from "react";
+import EditCluster from "../../../../components/edit-cluster";
 
 //TODO: validate cluster name
 const clusterFormSchema = z.object({
@@ -40,6 +43,12 @@ const clusterFormSchema = z.object({
     .min(6, { message: "Cluster name should be at least 6 characters long" })
     .max(15, "Cluster name should be less than 15 characters"),
 });
+
+interface ClusterProps {
+  id: number;
+  name: string;
+  visibility: "public" | "private";
+}
 
 export default function DashboardLayout({
   children,
@@ -53,6 +62,7 @@ export default function DashboardLayout({
     },
   });
   const [loading, setLoading] = useState<boolean>(false);
+  const [clusterName, setClusterName] = useState<string>("");
 
   useEffect(() => {
     setLoading(true);
@@ -60,6 +70,10 @@ export default function DashboardLayout({
       setLoading(false);
     }, 2000);
   }, []);
+
+  const filteredData = CLUSTERS.filter((cluster) =>
+    cluster.name.toLowerCase().includes(clusterName.toLowerCase())
+  );
 
   function onSubmit(values: z.infer<typeof clusterFormSchema>) {
     //TODO: api call
@@ -119,6 +133,10 @@ export default function DashboardLayout({
             <Input
               placeholder="Search clusters..."
               className="placeholder:text-sm border-none outline-none focus-visible:ring-0"
+              value={clusterName}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                setClusterName(event.target.value);
+              }}
             />
             <div className="p-2">
               <Search size={16} />
@@ -132,45 +150,52 @@ export default function DashboardLayout({
           <h1>My Clusters</h1>
           {/* clusters */}
           <div className="space-y-2 ">
-            {loading
-              ? Array.from({ length: CLUSTERS.length }).map((_, idx) => (
-                  <div key={idx} className="space-y-4">
-                    <ClusterSkeleton />
-                  </div>
-                ))
-              : CLUSTERS.map((cluster) => (
+            {loading ? (
+              Array.from({ length: CLUSTERS.length }).map((_, idx) => (
+                <div key={idx} className="space-y-4">
+                  <ClusterSkeleton />
+                </div>
+              ))
+            ) : filteredData.length === 0 ? (
+              <div className="p-4 flex items-center justify-center">
+                <span className="text-sm">Oops, Cluster Not Found!</span>
+              </div>
+            ) : (
+              filteredData.map((cluster) => (
+                <div
+                  className="w-full py-2 rounded-lg hover:font-semibold cursor-pointer text-sm transition-all flex justify-between items-center"
+                  key={cluster.id}
+                >
                   <Link
                     href={`/dashboard/cluster/${cluster.id}`}
-                    className="w-full py-2 rounded-lg hover:font-semibold cursor-pointer text-sm transition-all flex justify-between items-center"
-                    key={cluster.id}
+                    className="capitalize"
                   >
-                    <p className="capitalize">{cluster.name}</p>
-                    <div className="flex gap-2 items-center">
-                      <Tag title={cluster.visibility} />
-                      {/* actions */}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <EllipsisVertical size={16} />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent side="right">
-                          <DropdownMenuItem>
-                            <span className="flex gap-2">
-                              <Edit size={16} />
-                              <span>Edit cluster</span>
-                            </span>
-                          </DropdownMenuItem>
-                          <Separator className="my-2" />
-                          <DropdownMenuItem className="group">
-                            <span className="flex gap-2 w-full group-hover:text-[red]">
-                              <Trash size={16} />
-                              <span>Delete cluster</span>
-                            </span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
+                    {cluster.name}
                   </Link>
-                ))}
+                  <div className="flex gap-2 items-center">
+                    <Tag title={cluster.visibility} />
+                    {/* actions */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <EllipsisVertical size={16} />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent side="right">
+                        {/* edit cluster name */}
+                        <EditCluster clusterName={cluster.name} />
+
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="group">
+                          <span className="flex gap-2 w-full group-hover:text-[red]">
+                            <Trash size={16} />
+                            <span>Delete cluster</span>
+                          </span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

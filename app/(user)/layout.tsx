@@ -26,7 +26,7 @@ export default function UserRootLayout({
           },
           {
             title: "My Documents",
-            url: "/documents",
+            url: "/dashboard/documents",
             icon: <Folder />,
           },
           {

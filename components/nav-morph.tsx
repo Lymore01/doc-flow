@@ -34,7 +34,7 @@ export default function NavMorph({
         <>
           <Card
             key={item.name}
-            className="bg-white dark:bg-card-dark border border-gray-200 dark:border-gray-700 shadow-md rounded-none hover:shadow-lg transition-shadow duration-300 cursor-pointer group"
+            className="dark:bg-card-dark border border-gray-200 dark:border-gray-700 shadow-md rounded-none hover:shadow-lg transition-shadow duration-300 cursor-pointer group"
           >
             <CardContent className="grid gap-3 p-4 relative">
               <div className="flex items-center gap-3">

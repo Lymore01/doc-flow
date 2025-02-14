@@ -35,9 +35,6 @@ export default function UploadDocument() {
     },
   });
 
-const watchValues = form.watch();
-console.log("Form values:", watchValues);
-
   function onSubmit(values: z.infer<typeof documentSchema>) {
     console.log("Uploaded Document", values.document);
   }
