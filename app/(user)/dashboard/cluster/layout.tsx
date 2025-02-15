@@ -42,6 +42,7 @@ const clusterFormSchema = z.object({
     .string()
     .min(6, { message: "Cluster name should be at least 6 characters long" })
     .max(15, "Cluster name should be less than 15 characters"),
+  clusterCategory: z.string(),
 });
 
 interface ClusterProps {
@@ -59,6 +60,7 @@ export default function DashboardLayout({
     resolver: zodResolver(clusterFormSchema),
     defaultValues: {
       clusterName: "",
+      clusterCategory: "",
     },
   });
   const [loading, setLoading] = useState<boolean>(false);

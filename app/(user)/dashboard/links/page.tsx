@@ -223,7 +223,7 @@ export default function MyLinks() {
           <div className="flex justify-between items-center border rounded-lg focus-visible:ring-1 focus-visible:ring-ring">
             <Input
               type="text"
-              placeholder="Filter courses..."
+              placeholder="Filter clusters..."
               className="p-2 w-full sm:w-[300px] text-sm outline-none border-none"
               value={
                 (table.getColumn("name")?.getFilterValue() as string) ?? ""

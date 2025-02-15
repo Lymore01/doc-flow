@@ -263,3 +263,35 @@ export const linksData = [
 ];
 
 
+export const CLUSTER_CATEGORIES = [
+  { id: 1, name: "Technology" },
+  { id: 2, name: "Education" },
+  { id: 3, name: "Health & Wellness" },
+  { id: 4, name: "Finance & Business" },
+  { id: 5, name: "E-commerce" },
+  { id: 6, name: "Entertainment" },
+  { id: 7, name: "Travel & Tourism" },
+  { id: 8, name: "Food & Beverage" },
+  { id: 9, name: "Social Media" },
+  { id: 10, name: "Productivity" },
+  { id: 11, name: "Government & Politics" },
+  { id: 12, name: "Gaming" },
+  { id: 13, name: "Cryptocurrency & Blockchain" },
+  { id: 14, name: "Automobile" },
+  { id: 15, name: "Real Estate" },
+  { id: 16, name: "Sports & Fitness" },
+  { id: 17, name: "Science & Research" },
+  { id: 18, name: "Art & Design" },
+  { id: 19, name: "Fashion & Lifestyle" },
+  { id: 20, name: "News & Media" },
+  { id: 21, name: "Programming & Development" },
+  { id: 22, name: "AI & Machine Learning" },
+  { id: 23, name: "Cybersecurity" },
+  { id: 24, name: "Non-Profit & Charity" },
+  { id: 25, name: "Self-Improvement" },
+  { id: 26, name: "Parental & Family" },
+  { id: 27, name: "Legal & Law" },
+  { id: 28, name: "Marketing & Advertising" },
+  { id: 29, name: "Music & Audio" },
+  { id: 30, name: "Spirituality & Mindfulness" }
+];

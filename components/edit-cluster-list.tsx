@@ -22,9 +22,13 @@ import {
   FormMessage,
 } from "./ui/form";
 import { Edit } from "lucide-react";
+import Selection from "./selection";
+import { CLUSTER_CATEGORIES } from "../lib/constants";
+import { ClusterCategoryProps } from "./add-cluster-form";
 
 const formSchema = z.object({
   clusterName: z.string().min(1, { message: "Cluster name is required" }),
+  clusterCategory:z.string()
 });
 
 export default function EditClusterList() {
@@ -32,6 +36,7 @@ export default function EditClusterList() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       clusterName: "",
+      clusterCategory:""
     },
   });
 
@@ -72,6 +77,35 @@ export default function EditClusterList() {
                   </FormItem>
                 )}
               ></FormField>
+              <FormField
+                control={form.control}
+                name="clusterCategory"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel htmlFor="clusterCategory">
+                      Cluster Category
+                    </FormLabel>
+                    <FormControl>
+                      <Selection
+                        items={CLUSTER_CATEGORIES.map(
+                          (category: ClusterCategoryProps) => category.name
+                        )}
+                        onValueChange={(value: string) => {
+                          const category = CLUSTER_CATEGORIES.find(
+                            (obj: ClusterCategoryProps) =>
+                              obj.name.toLowerCase() === value.toLowerCase()
+                          );
+                          if (category) {
+                            field.onChange(category.name);
+                          }
+                        }}
+                        label={"Category"}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <MoveDocuments />
             </div>
             <Separator />
