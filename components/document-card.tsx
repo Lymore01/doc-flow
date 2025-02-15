@@ -17,6 +17,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { CLUSTERS } from "../lib/constants";
@@ -41,6 +42,15 @@ export default function DocumentCard({
   const handleMoveToCluster = (cluster: string) => {
     setSelectedCluster(cluster);
     console.log(`Moved "${name}" to "${selectedCluster}"`);
+    // update the database with the new cluster
+  };
+
+  const handleFileDownload = () => {
+    // make a get request to retrieve the file
+  };
+
+  const handleFileDelete = () => {
+    // delete from the db and supabase
   };
   return (
     <Card className="rounded-md shadow-md">
@@ -61,6 +71,7 @@ export default function DocumentCard({
             <p className="text-xs ">Type: {type?.toUpperCase()}</p>
             <p className="text-xs ">Size: {size}</p>
             <p className="text-xs ">Uploaded: {date}</p>
+            <p className="text-xs ">Cluster: School Reports</p>
           </div>
         </div>
       </CardContent>
@@ -102,17 +113,25 @@ export default function DocumentCard({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
+                        <span className="px-2 text-sm font-semibold">
+                          Clusters
+                        </span>
+                        <DropdownMenuSeparator />
                         {CLUSTERS.map((cluster) => (
                           <DropdownMenuItem
                             key={cluster.id}
-                            onClick={() => handleMoveToCluster(cluster.name)}
+                            onClick={(cluster) => handleMoveToCluster(cluster.name)}
                           >
                             {cluster.name}
                           </DropdownMenuItem>
                         ))}
                       </DropdownMenuContent>
                     </DropdownMenu>
-                    <Button variant="destructive" size="icon">
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      onClick={handleFileDelete}
+                    >
                       <Trash className="w-5 h-5" />
                     </Button>
                   </div>
@@ -130,8 +149,8 @@ export default function DocumentCard({
               {showPreview && (
                 <div className="border rounded-lg shadow-md p-4 overflow-auto h-[70vh]">
                   <DocumentViewer
-                    fileType="xlsx"
-                    fileUrl="/documents/sample.xlsx"
+                    fileType="docx"
+                    fileUrl="/documents/sample.docx"
                   />
                 </div>
               )}
@@ -139,10 +158,10 @@ export default function DocumentCard({
           </SheetContent>
         </Sheet>
 
-        <Button size="sm" variant="default">
+        <Button size="sm" variant="default" onClick={handleFileDownload}>
           <Download className="w-4 h-4 " />
         </Button>
-        <Button size="sm" variant="destructive">
+        <Button size="sm" variant="destructive" onClick={handleFileDelete}>
           <Trash className="w-4 h-4 " />
         </Button>
       </CardFooter>
@@ -150,4 +169,4 @@ export default function DocumentCard({
   );
 }
 
-// Todo: ensure the document card actions and search filter are working
+// Todo: ensure the document card actions and search filter (from the server) are working

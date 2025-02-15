@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "../../../../components/ui/input";
 import { Filter, Search } from "lucide-react";
 import { Separator } from "../../../../components/ui/separator";
@@ -14,23 +14,56 @@ import {
 } from "../../../../components/ui/dropdown-menu";
 
 import DocumentCard from "../../../../components/document-card";
-import { DOCS } from "../../../../lib/constants";
+import { CLUSTERS, DOCS } from "../../../../lib/constants";
 import { useSidebar } from "../../../../components/ui/sidebar";
-// import { DOCS } from "../../../../lib/constants";
+import { useRouter } from "next/navigation";
 
 export default function MyDocuments() {
+  const router = useRouter();
   const [documentName, setDocumentName] = useState<string>("");
   const [selectedFilter, setSelectedFilter] = useState<string>("");
 
-  const {state} = useSidebar()
+  const { state } = useSidebar();
 
   const handleFilterSelect = (filter: string) => {
     setSelectedFilter(filter);
   };
 
-  const filteredDocs = DOCS.filter((doc) =>
-    doc.name.toLowerCase().includes(documentName.toLowerCase())
-  );
+  const filteredDocs = DOCS.filter((doc) => {
+    const matchesName = doc.name
+      .toLowerCase()
+      .includes(documentName.toLowerCase());
+
+    if (!selectedFilter || selectedFilter === "all") {
+      return matchesName;
+    }
+
+    if (selectedFilter === "recent") {
+      return (
+        matchesName &&
+        new Date(doc.date) >= new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+      );
+    }
+
+    if (selectedFilter === "cluster") {
+      return (
+        matchesName && CLUSTERS.some((cluster) => cluster.name === "Project Reports")
+      );
+    }
+
+    return matchesName && doc.name.toLowerCase().endsWith(selectedFilter);
+  });
+
+  useEffect(() => {
+    if (selectedFilter) {
+      const url = new URL(window.location.href);
+      const searchParams = url.searchParams;
+      searchParams.set("filterBy", selectedFilter);
+
+      router.replace(`${url.pathname}?${searchParams.toString()}`, undefined);
+    }
+  }, [selectedFilter, router]);
+
   return (
     <>
       <div className="">
@@ -65,6 +98,27 @@ export default function MyDocuments() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => handleFilterSelect("pdf")}>
                   PDFs
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleFilterSelect("cluster")}>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <span>Cluster</span>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent side="left" align="start">
+                      <span className="px-2 text-sm font-semibold">
+                        Clusters
+                      </span>
+                      <DropdownMenuSeparator />
+                      {CLUSTERS.map((cluster) => (
+                        <DropdownMenuItem
+                          key={cluster.id}
+                          onClick={() => handleFilterSelect(cluster)}
+                        >
+                          {cluster.name}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleFilterSelect("docx")}>
                   Word Docs
@@ -108,4 +162,3 @@ export default function MyDocuments() {
     </>
   );
 }
-
