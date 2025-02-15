@@ -31,7 +31,7 @@ export default function UserRootLayout({
           },
           {
             title: "My Links",
-            url: "/links",
+            url: "/dashboard/links",
             icon: <Link />,
           },
           {

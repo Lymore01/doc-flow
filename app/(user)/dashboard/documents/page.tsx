@@ -45,12 +45,6 @@ export default function MyDocuments() {
       );
     }
 
-    if (selectedFilter === "cluster") {
-      return (
-        matchesName && CLUSTERS.some((cluster) => cluster.name === "Project Reports")
-      );
-    }
-
     return matchesName && doc.name.toLowerCase().endsWith(selectedFilter);
   });
 
@@ -99,27 +93,7 @@ export default function MyDocuments() {
                 <DropdownMenuItem onClick={() => handleFilterSelect("pdf")}>
                   PDFs
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleFilterSelect("cluster")}>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <span>Cluster</span>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent side="left" align="start">
-                      <span className="px-2 text-sm font-semibold">
-                        Clusters
-                      </span>
-                      <DropdownMenuSeparator />
-                      {CLUSTERS.map((cluster) => (
-                        <DropdownMenuItem
-                          key={cluster.id}
-                          onClick={() => handleFilterSelect(cluster)}
-                        >
-                          {cluster.name}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </DropdownMenuItem>
+
                 <DropdownMenuItem onClick={() => handleFilterSelect("docx")}>
                   Word Docs
                 </DropdownMenuItem>
