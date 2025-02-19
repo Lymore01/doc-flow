@@ -36,12 +36,12 @@ export default function UserRootLayout({
           },
           {
             title: "Analytics",
-            url: "/analytics",
+            url: "/dashboard/analytics",
             icon: <BarChart />,
           },
           {
             title: "Settings",
-            url: "/settings",
+            url: "/dashboard/settings",
             icon: <Settings />,
           },
         ]}

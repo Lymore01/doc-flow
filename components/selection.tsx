@@ -22,7 +22,7 @@ const Selection = React.forwardRef<HTMLSelectElement, SelectionProps>(
   ({ label, items, onValueChange }, ref) => {
     return (
       <div>
-        <Select onValueChange={(value) => onValueChange(value.toUpperCase())} defaultValue="">
+        <Select onValueChange={(value) => onValueChange(value)} defaultValue="">
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder={`Select ${label}`} />
           </SelectTrigger>
@@ -30,8 +30,8 @@ const Selection = React.forwardRef<HTMLSelectElement, SelectionProps>(
             <SelectGroup>
               <SelectLabel>{label}</SelectLabel>
               {items.map((item) => (
-                <SelectItem value={item.toUpperCase()} key={item}>
-                  {item.toUpperCase()}
+                <SelectItem value={item} key={item}>
+                  {item}
                 </SelectItem>
               ))}
             </SelectGroup>

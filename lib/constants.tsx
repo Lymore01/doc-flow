@@ -95,6 +95,36 @@ export const INTEGRATIONS = [
   },
 ];
 
+export const TRACKING_DATA = [
+  {
+    id: 1,
+    email: "john.doe@example.com",
+    clicks: 5,
+  },
+  {
+    id: 2,
+    email: "jane.smith@example.com",
+    clicks: 3,
+  },
+  {
+    id: 3,
+    email: "bob.johnson@example.com",
+    clicks: 8,
+  },
+  {
+    id: 4,
+    email: "alice.brown@example.com",
+    clicks: 2,
+  },
+  {
+    id: 5,
+    email: "charlie.davis@example.com",
+    clicks: 7,
+  }
+];
+
+
+
 
 export const CLUSTERS = [
   {
