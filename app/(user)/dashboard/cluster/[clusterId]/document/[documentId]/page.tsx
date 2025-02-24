@@ -1,6 +1,6 @@
-"use client"
+"use client";
 import DocumentViewer from "../../../../../../../components/document-viewer";
 
 export default function Document() {
-  return <DocumentViewer fileType="xlsx" fileUrl="/documents/sample.xlsx" />;
+  return <DocumentViewer fileType="docx" fileUrl="/documents/sample.docx" />;
 }

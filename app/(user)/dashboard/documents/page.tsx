@@ -60,14 +60,22 @@ export default function MyDocuments() {
 
   return (
     <>
-      <div className="">
-        <header className="flex justify-between items-center py-4 px-6">
-          <h1>My Documents</h1>
-          <div className="flex gap-2 items-center">
-            <div className="flex justify-between items-center border rounded-lg focus-visible:ring-1 focus-visible:ring-ring">
+      <div className="flex flex-col h-screen overflow-hidden">
+        {/* Header */}
+        <header className="flex flex-wrap justify-between items-center py-4 px-4 sm:px-6">
+          <div>
+          <h1 className="text-lg font-semibold">My Documents</h1>
+          <p className="text-[0.8rem] text-muted-foreground">
+            Here&apos;s a list of all documents you have uploaded
+          </p>
+          </div>
+
+          <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto mt-3 sm:mt-0">
+
+            <div className="flex items-center border rounded-lg focus-within:ring-2  w-full sm:w-auto">
               <Input
                 placeholder="Search documents..."
-                className="placeholder:text-sm border-none outline-none focus-visible:ring-0"
+                className="flex-1 px-3 py-2 text-sm border-none outline-none focus:ring-0"
                 value={documentName}
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                   setDocumentName(event.target.value);
@@ -77,6 +85,8 @@ export default function MyDocuments() {
                 <Search size={16} />
               </div>
             </div>
+
+            {/* Filter Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
@@ -93,7 +103,6 @@ export default function MyDocuments() {
                 <DropdownMenuItem onClick={() => handleFilterSelect("pdf")}>
                   PDFs
                 </DropdownMenuItem>
-
                 <DropdownMenuItem onClick={() => handleFilterSelect("docx")}>
                   Word Docs
                 </DropdownMenuItem>
@@ -111,15 +120,16 @@ export default function MyDocuments() {
             </DropdownMenu>
           </div>
         </header>
+
+        {/* Separator */}
         <Separator />
-        {/* docs grid */}
-        <div
-          className={`transition-all duration-300 ${
-            state.valueOf() === "expanded" ? "ml-0" : "ml-0"
-          } p-4`}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 p-4 w-full">
-            {filteredDocs.length === 0 && <span>No results found</span>}
+
+        {/* Document Grid */}
+        <div className="flex-1 overflow-y-auto p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
+            {filteredDocs.length === 0 && (
+              <span className="text-gray-500">No results found</span>
+            )}
             {filteredDocs.map((doc) => (
               <DocumentCard
                 name={doc.name}

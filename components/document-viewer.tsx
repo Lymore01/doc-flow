@@ -15,7 +15,10 @@ interface DocumentViewerProps {
   fileType: string;
 }
 
-export default function DocumentViewer({ fileUrl, fileType }: DocumentViewerProps) {
+export default function DocumentViewer({
+  fileUrl,
+  fileType,
+}: DocumentViewerProps) {
   const [content, setContent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -53,54 +56,80 @@ export default function DocumentViewer({ fileUrl, fileType }: DocumentViewerProp
   }, [fileUrl, fileType]);
 
   return (
-    <div className="container min-h-screen overflow-auto">
-      {fileType === "pdf" && (
-        <div style={{ height: "80vh" }}>
-          <PdfReactPdf src={fileUrl} />
-        </div>
-      )}
-
-      {fileType === "docx" && (
-        loading ? <DocSkeleton /> : <div dangerouslySetInnerHTML={{ __html: content }} />
-      )}
-
-      {fileType === "txt" && (loading ? <TextSkeleton /> : <pre>{content}</pre>)}
-
-      {fileType === "md" && (loading ? <MarkdownSkeleton /> : <ReactMarkdown>{content}</ReactMarkdown>)}
-
-      {fileType === "xlsx" || fileType === "csv" ? (
-        loading ? (
-          <ExcelSkeleton />
-        ) : (
-          <div className="overflow-x-auto w-full">
-            <table className="min-w-full border-collapse border border-gray-300">
-              <tbody>
-                {Array.isArray(content) ? (
-                  content.map((row: any, rowIndex: number) => (
-                    <tr key={rowIndex} className="border border-gray-200">
-                      {Object.values(row).map((cell: any, cellIndex) => (
-                        <td key={cellIndex} className="p-2 border border-gray-300">
-                          <span>{cell}</span>
-                        </td>
-                      ))}
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td className="p-2 border border-gray-300">
-                      <pre>{String(content)}</pre>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+    <div className="container min-h-screen flex flex-col overflow-hidden">
+      <div className="flex-1 overflow-y-auto">
+        {fileType === "pdf" && (
+          <div className="h-[calc(100vh-80px)] overflow-y-auto">
+            <PdfReactPdf src={fileUrl} />
           </div>
-        )
-      ) : null}
+        )}
 
-      {["png", "jpg", "jpeg", "gif", "svg"].includes(fileType) && (
-        <Image src={fileUrl} alt="Document Image" width={800} height={600} />
-      )}
+        {fileType === "docx" &&
+          (loading ? (
+            <DocSkeleton />
+          ) : (
+            <div dangerouslySetInnerHTML={{ __html: content }} />
+          ))}
+
+        {fileType === "txt" &&
+          (loading ? (
+            <TextSkeleton />
+          ) : (
+            <pre className="whitespace-pre-wrap">{content}</pre>
+          ))}
+
+        {fileType === "md" &&
+          (loading ? (
+            <MarkdownSkeleton />
+          ) : (
+            <ReactMarkdown>{content}</ReactMarkdown>
+          ))}
+
+        {["xlsx", "csv"].includes(fileType) &&
+          (loading ? (
+            <ExcelSkeleton />
+          ) : (
+            <div className="overflow-x-auto w-full">
+              <table className="min-w-full border-collapse border border-gray-300">
+                <tbody>
+                  {Array.isArray(content) ? (
+                    content.map((row: any, rowIndex: number) => (
+                      <tr key={rowIndex} className="border border-gray-200">
+                        {Object.values(row).map(
+                          (cell: any, cellIndex: number) => (
+                            <td
+                              key={cellIndex}
+                              className="p-2 border border-gray-300"
+                            >
+                              <span>{cell}</span>
+                            </td>
+                          )
+                        )}
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td className="p-2 border border-gray-300">
+                        <pre>{String(content)}</pre>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          ))}
+
+        {["png", "jpg", "jpeg", "gif", "svg"].includes(fileType) && (
+          <div className="flex justify-center">
+            <Image
+              src={fileUrl}
+              alt="Document Image"
+              width={800}
+              height={600}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

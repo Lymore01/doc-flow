@@ -216,15 +216,22 @@ export default function MyLinks() {
   });
 
   return (
-    <div className="max-h-screen overflow-hidden">
-      <header className="flex justify-between items-center py-4 px-6">
-        <h1>My Links</h1>
-        <div className="flex gap-2 items-center">
-          <div className="flex justify-between items-center border rounded-lg focus-visible:ring-1 focus-visible:ring-ring">
+    <div className="max-h-screen overflow-y-scroll md:overflow-hidden md:overflow-y-scroll">
+      <header className="flex flex-col sm:flex-row justify-between items-start py-4 px-4 sm:px-6 gap-4 w-screen md:w-full">
+        <div>
+          <h1 className="text-lg font-semibold">My Links</h1>
+          <p className="text-[0.8rem] text-muted-foreground">
+            Here&apos;s a table showing all the links you have created
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          {/* Search Input */}
+          <div className="flex items-center border rounded-lg focus-visible:ring-1 focus-visible:ring-ring w-full sm:w-[300px]">
             <Input
               type="text"
               placeholder="Filter clusters..."
-              className="p-2 w-full sm:w-[300px] text-sm outline-none border-none"
+              className="p-2 w-full text-sm outline-none border-none"
               value={
                 (table.getColumn("name")?.getFilterValue() as string) ?? ""
               }
@@ -236,9 +243,11 @@ export default function MyLinks() {
               <Search size={16} />
             </div>
           </div>
+
+          {/* Column Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
+              <Button variant="outline">
                 Columns <ChevronDown />
               </Button>
             </DropdownMenuTrigger>
@@ -262,59 +271,69 @@ export default function MyLinks() {
           </DropdownMenu>
         </div>
       </header>
+
       <Separator />
-      <div className="p-4">
-        <div className="overflow-auto h-[calc(100vh-100px)] p-4 border rounded-lg">
-          <Table className="table-auto w-full min-w-max">
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    className="cursor-pointer dark:hover:bg-secondary"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
+
+      {/* Table Container */}
+      <div className="p-2 sm:p-4 overflow-auto h-full w-screen md:w-full">
+        <div className="h-auto p-0 border rounded-lg">
+          <div className="overflow-x-auto">
+            <Table className="table-auto min-w-full">
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead key={header.id} className="text-xs sm:text-sm">
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
                     ))}
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="text-center">
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-          {/* Pagination */}
-          <div className="flex items-center justify-end space-x-2 py-4 px-4">
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      className="cursor-pointer dark:hover:bg-secondary"
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id} className="text-xs sm:text-sm">
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="text-center text-xs sm:text-sm"
+                    >
+                      No results.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Responsive Pagination */}
+          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2 py-4 px-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
+              className="text-xs sm:text-sm"
             >
               Previous
             </Button>
@@ -323,6 +342,7 @@ export default function MyLinks() {
               size="sm"
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
+              className="text-xs sm:text-sm"
             >
               Next
             </Button>

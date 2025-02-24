@@ -24,7 +24,7 @@ export default function RootLayout({
       <body className={`${poppins.variable} antialiased`}>
         <div className="md:w-[80%] mx-auto h-screen max-h-screen flex flex-col">
           <NavBar />
-          {children}
+          <div className="flex-1">{children}</div>
         </div>
       </body>
     </html>

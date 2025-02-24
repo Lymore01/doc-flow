@@ -46,13 +46,15 @@ export default function UserRootLayout({
           },
         ]}
       />
-      <main className="flex-1 max-h-screen overflow-hidden">
+      <main className="flex flex-col flex-1 h-screen">
         <div className="flex items-center justify-between p-2">
           <SidebarTrigger />
           <ThemeSwitch />
         </div>
-        <Separator className="my--2"/>
-        <div className="">{children}</div>
+
+        <Separator />
+
+        <div className="flex-1 overflow-y-auto md:overflow-hidden">{children}</div>
       </main>
     </SidebarProvider>
   );

@@ -74,7 +74,7 @@ export default function Settings() {
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-6 w-full flex-1 overflow-auto p-4"
         >
-          <Card className="rounded-lg shadow-lg border flex flex-col h-screen">
+          <Card className="rounded-lg shadow-lg border flex flex-col h-auto">
             <CardHeader className="flex">
               <CardTitle className="flex justify-between items-center text-lg font-medium">
                 Profile Information

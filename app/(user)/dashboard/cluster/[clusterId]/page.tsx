@@ -7,6 +7,7 @@ import {
   ChevronDown,
   Clipboard,
   CopyIcon,
+  Edit,
   EllipsisVertical,
   RefreshCcw,
   Search,
@@ -59,15 +60,21 @@ export default function ClusterPage({
 
   // TODO: fetch from db
   return (
-    <div className="flex flex-col">
-      {/* header */}
-      <div className="text-lg py-4 px-6 flex justify-between items-center">
-        Cluster {clusterId}
-        <div className="flex items-center gap-2 w-auto">
-          <div className="flex justify-between items-center border rounded-lg focus-visible:ring-1 focus-visible:ring-ring">
+    <div className="flex flex-col w-full">
+      {/* Header */}
+      <div className="text-lg py-4 px-6 flex flex-wrap justify-between items-center gap-3">
+        <div className="flex items-center justify-between w-full md:w-auto">
+          <span className="text-xl font-semibold">Cluster {clusterId}</span>
+          <Button variant={"secondary"} className="flex md:hidden gap-2">
+            <Edit />
+            <span>Edit</span>
+          </Button>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+          <div className="flex items-center border rounded-lg w-full md:w-auto">
             <Input
               placeholder="Search documents..."
-              className="placeholder:text-sm border-none outline-none focus-visible:ring-0"
+              className="placeholder:text-sm border-none outline-none focus-visible:ring-0 flex-1"
               value={documentName}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 setDocumentName(event.target.value);
@@ -77,26 +84,28 @@ export default function ClusterPage({
               <Search size={16} />
             </div>
           </div>
-          <Separator orientation="vertical" />
+
+          <Separator orientation="vertical" className="hidden md:block" />
+
           <Button
-            variant={"secondary"}
-            className="w-fit flex items-center justify-start h-auto"
+            variant="secondary"
+            className="w-full md:w-auto flex items-center gap-2"
           >
-            <RefreshCcw />
-            {/* refetch from the database */}
+            <RefreshCcw size={16} />
             <span>Reload</span>
           </Button>
 
-          {/* upload doc */}
           <UploadDocument />
-          <Separator orientation="vertical" />
+
+          <Separator orientation="vertical" className="hidden md:block" />
+
           <Dialog>
             <DialogTrigger asChild>
               <Button
-                variant={"secondary"}
-                className="w-fit flex items-center justify-start bg-primary text-primary-foreground hover:text-primary-dark dark:bg-[#2563EB]"
+                variant="secondary"
+                className="w-full md:w-auto flex items-center gap-2"
               >
-                <Clipboard />
+                <Clipboard size={16} />
                 <span>Get Url</span>
               </Button>
             </DialogTrigger>
@@ -104,14 +113,15 @@ export default function ClusterPage({
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Get Url</DialogTitle>
-                <DialogDescription>This Url contains all the documents in cluster {clusterId}</DialogDescription>
+                <DialogDescription>
+                  This Url contains all the documents in cluster {clusterId}
+                </DialogDescription>
               </DialogHeader>
+
               <Separator />
+
               <Accordion type="single" collapsible className="w-full">
-                <AccordionItem
-                  value="edit"
-                  className="border-none transition-transform"
-                >
+                <AccordionItem value="edit" className="border-none">
                   <AccordionTrigger className="flex justify-between items-center w-full">
                     <span>Edit</span>
                     <ChevronDown size={16} />
@@ -121,13 +131,14 @@ export default function ClusterPage({
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
+
               <Separator />
+
               <DialogFooter>
                 <div className="flex items-center justify-between w-full">
-                  {/* url */}
                   <p className="text-sm">docX.io/kellylimo</p>
                   <Button
-                    variant={"secondary"}
+                    variant="secondary"
                     onClick={() => {
                       toast({
                         title: "Success",
@@ -143,15 +154,14 @@ export default function ClusterPage({
               </DialogFooter>
             </DialogContent>
           </Dialog>
-
-          <Separator orientation="vertical" />
         </div>
       </div>
+
       <Separator />
-      {/* main content */}
+
       <div className="h-screen flex">
         {/* list */}
-        <div className="w-1/4">
+        <div className="w-full md:w-1/4">
           <div className="py-4 px-6 ">
             <h1 className="text-lg">Documents</h1>
           </div>
@@ -166,7 +176,7 @@ export default function ClusterPage({
               filteredDocs.map((doc) => (
                 <div key={doc.id}>
                   <div
-                    className="flex items-center justify-between gap-4 text-sm hover:font-semibold transition-all cursor-pointer pl-4"
+                    className="flex items-center justify-between gap-4 text-sm hover:font-semibold transition-all cursor-pointer px-4"
                     onClick={() => {
                       router.push(
                         `/dashboard/cluster/${clusterId}/document/${doc.id}`
@@ -206,9 +216,9 @@ export default function ClusterPage({
             )}
           </div>
         </div>
-        <Separator orientation="vertical" />
+        <Separator orientation="vertical" className="hidden md:block" />
 
-        <div className="flex-1 py-4 px-6 h-[calc(100vh-80px)] overflow-auto">
+        <div className="hidden md:flex flex-1 py-4 px-6 h-[calc(100vh-80px)] overflow-auto">
           {children}
         </div>
       </div>

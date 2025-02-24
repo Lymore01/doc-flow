@@ -141,7 +141,7 @@ export default function UsersTrackerTable() {
       </div>
       {/* table */}
       <div className="p-4">
-        <div className="overflow-auto h-[calc(100vh-100px)] border rounded-lg">
+        <div className="overflow-auto h-auto border rounded-lg">
           <Table className="table-auto w-full min-w-max">
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
