@@ -9,10 +9,10 @@ export default function Home() {
   return (
     <div className="md:w-[80%] mx-auto">
       <NavBar />
-      <main className="w-full flex items-start justify-center mt-8 px-6 lg:px-20 h-auto">
+      <div className="w-full flex items-start justify-center mt-8 px-6 lg:px-20 h-auto">
         {/* hero section */}
         <div className="max-w-4xl text-center space-y-6">
-          <h1 className="font-extrabold text-4xl md:text-4xl leading-tight  dark:text-white">
+          <h1 className="font-extrabold text-4xl md:text-4xl leading-tight dark:text-white">
             Streamline Your Documents <br /> Like Never Before
           </h1>
           <p className="text-base md:text-lg  dark:text-gray-300 leading-relaxed">
@@ -31,7 +31,7 @@ export default function Home() {
           </div>
         {/* sample */}
         </div>
-      </main>
+      </div>
     </div>
   );
 }

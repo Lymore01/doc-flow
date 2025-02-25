@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "../components/theme-provider";
+import localFont from 'next/font/local'
+import { ClerkProvider } from "@clerk/nextjs";
 
-// Import Poppins font
-const poppins = Poppins({
+const poppins = localFont({
+  src: "./fonts/Poppins/Poppins-Medium.ttf",
   variable: "--font-poppins",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"], 
+  weight: "100 900",
 });
-
 export const metadata: Metadata = {
   title: "DocX",
   description: "Your document management solution",
@@ -21,17 +20,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${poppins.variable} antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
-      </body>
-    </html>
+    <ClerkProvider
+    signInUrl="/login"
+    signUpUrl="/signup"
+    >
+      <html lang="en">
+        <body className={`${poppins.variable} antialiased`}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

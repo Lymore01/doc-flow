@@ -1,7 +1,8 @@
 "use client";
-
 import Image from "next/image";
 import Link from "next/link";
+import blackLogo from "../public/images/docX-logo-black.png";
+import whiteLogo from "../public/images/docX-logo-white.png";
 import { useTheme } from "next-themes";
 import ThemeSwitch from "./theme";
 import Regbutton from "./reg-button";
@@ -15,7 +16,6 @@ import {
   PRODUCTS,
   SOLUTIONS,
 } from "../lib/constants";
-import { useIsMobile } from "../hooks/useMobile";
 import MobileNav from "./mobile-nav";
 export default function NavBar() {
   const navRef = useRef<HTMLElement | null>(null);
@@ -23,13 +23,9 @@ export default function NavBar() {
   const navHeight = useNavHeight(navRef);
 
   const { theme } = useTheme();
-  const isMobile = useIsMobile();
 
   const getLogoSrc = () => {
-    const basePath = isMobile ? "/images/docX-logo" : "/images/docX-logo";
-    return theme === "light"
-      ? `${basePath}-black.png`
-      : `${basePath}-white.png`;
+    return theme === "dark" || theme === "system" ? whiteLogo.src : blackLogo.src;
   };
 
   return (
@@ -43,6 +39,8 @@ export default function NavBar() {
           alt="docX"
           width={120}
           height={40}
+          priority
+          loading="eager"
           className="w-[90px] h-[60px] md:size-auto"
         />
       </Link>
@@ -91,8 +89,7 @@ export default function NavBar() {
         />
       </div>
 
-      <MobileNav src={getLogoSrc} setActiveItem={setActiveItem}/>
+      <MobileNav src={getLogoSrc} setActiveItem={setActiveItem} />
     </header>
   );
 }
-

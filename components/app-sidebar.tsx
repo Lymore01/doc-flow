@@ -16,13 +16,7 @@ import {
 import Image from "next/image";
 import { useIsMobile } from "../hooks/useMobile";
 import { useTheme } from "next-themes";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
-import { BadgeCheck, Bell, ChevronsUpDown, LogOut } from "lucide-react";
+import { SignedIn, UserButton } from "@clerk/nextjs";
 
 interface SidebarItem {
   title: string;
@@ -30,23 +24,6 @@ interface SidebarItem {
   icon: React.ReactNode;
 }
 
-const USER_PROFILE_ITEMS = [
-  {
-    title: "Account",
-    url: "/account",
-    icon: <BadgeCheck />,
-  },
-  {
-    title: "Notifications",
-    url: "/notifications",
-    icon: <Bell />,
-  },
-  {
-    title: "Sign Out",
-    url: "/logout",
-    icon: <LogOut />,
-  },
-];
 
 export default function AppSideBar({ items }: { items: SidebarItem[] }) {
   const { theme } = useTheme();
@@ -97,45 +74,11 @@ export default function AppSideBar({ items }: { items: SidebarItem[] }) {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton className="h-auto">
-                  <div className="size-9 rounded-lg cursor-pointer">
-                    <Image
-                      src={"/images/profile.jpg"}
-                      alt="profile image"
-                      width={120}
-                      height={40}
-                      className="w-[90px] h-[60px] lg:size-full rounded-lg object-cover object-center"
-                    />
-                  </div>
-
-                  {state !== "collapsed" && (
-                    // !fix: make sure the image is collapsed properly
-                    <>
-                      <div className="text-base">
-                        <h1>Kelly Limo</h1>
-                        <p className="text-xs">kelly@gmail.com</p>
-                      </div>
-                      <ChevronsUpDown className="ml-auto" />
-                    </>
-                  )}
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                side="top"
-                className="w-[--radix-popper-anchor-width]"
-              >
-                {USER_PROFILE_ITEMS.map((item) => (
-                  <DropdownMenuItem key={item.title}>
-                    <Link href={item.url} className="flex gap-2">
-                      {item.icon}
-                      <span>{item.title}</span>
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <SidebarMenuButton className="h-auto">
+              <SignedIn>
+                <UserButton />
+              </SignedIn>
+            </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

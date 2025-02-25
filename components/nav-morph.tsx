@@ -23,7 +23,7 @@ export default function NavMorph({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3 }}
       className={cn(
-        "md:absolute bg-white dark:bg-background md:dark:bg-card-dark shadow-xl rounded-lg p-0 md:p-4 w-full md:w-96 grid gap-3"
+        "md:absolute bg-background dark:bg-card-dark md:dark:bg-card-dark shadow-xl rounded-lg p-0 md:p-4 w-full md:w-96 grid gap-3"
       )}
       style={{ top: `${navH}px` }}
       onMouseEnter={() => setActiveItem(label)}
@@ -39,7 +39,7 @@ export default function NavMorph({
             <CardContent className="grid gap-3 p-4 relative">
               <div className="flex items-center gap-3">
                 {item.icon}
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h3 className="text-lg font-semibold text-card-foreground dark:text-card-foreground">
                   {item.name}
                 </h3>
               </div>

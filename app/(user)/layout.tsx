@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { SidebarProvider, SidebarTrigger } from "../../components/ui/sidebar";
-import { BarChart, Folder, Home, Link, Settings } from "lucide-react";
+import { BarChart, Folder, Home, Link } from "lucide-react";
 import AppSideBar from "../../components/app-sidebar";
 import ThemeSwitch from "../../components/theme";
 import { Separator } from "../../components/ui/separator";
@@ -38,15 +38,10 @@ export default function UserRootLayout({
             title: "Analytics",
             url: "/dashboard/analytics",
             icon: <BarChart />,
-          },
-          {
-            title: "Settings",
-            url: "/dashboard/settings",
-            icon: <Settings />,
-          },
+          }
         ]}
       />
-      <main className="flex flex-col flex-1 h-screen">
+      <div className="flex flex-col flex-1 h-screen">
         <div className="flex items-center justify-between p-2">
           <SidebarTrigger />
           <ThemeSwitch />
@@ -55,7 +50,7 @@ export default function UserRootLayout({
         <Separator />
 
         <div className="flex-1 overflow-y-auto md:overflow-hidden">{children}</div>
-      </main>
+      </div>
     </SidebarProvider>
   );
 }
