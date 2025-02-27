@@ -96,7 +96,7 @@ export default function UploadDocument() {
             <Separator />
 
             <DialogFooter>
-              <Button variant={"secondary"} type="submit" form="documentForm">
+              <Button variant={"secondary"} type="submit" form="documentForm" className="bg-blue-600 text-white">
                 <span>Submit</span>
               </Button>
             </DialogFooter>

@@ -83,9 +83,9 @@ export function AnalyticsChart() {
     <Card className="w-full">
       <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
-          <CardTitle className="flex gap-4 items-center">
+          <CardTitle className="flex gap-4 items-center w-full justify-between">
             {activeCluster}{" "}
-            <Button variant={"secondary"}>
+            <Button variant={"secondary"} className="bg-blue-600 text-white">
               <CopyIcon size={16} />
               <span>Copy Url</span>
             </Button>{" "}

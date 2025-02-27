@@ -103,7 +103,7 @@ export default function ClusterPage({
             <DialogTrigger asChild>
               <Button
                 variant="secondary"
-                className="w-full md:w-auto flex items-center gap-2"
+                className="w-full md:w-auto flex items-center gap-2 bg-blue-600 text-white"
               >
                 <Clipboard size={16} />
                 <span>Get Url</span>
@@ -146,6 +146,7 @@ export default function ClusterPage({
                         variant: "default",
                       });
                     }}
+                    className="bg-blue-600 text-white"
                   >
                     <CopyIcon size={16} />
                     <span>Copy Url</span>

@@ -70,7 +70,7 @@ export default function ClusterSection({
           <DialogTrigger asChild>
             <Button
               variant={"secondary"}
-              className="w-full flex items-center justify-start"
+              className="w-full flex items-center justify-start bg-blue-600 text-white"
             >
               <Edit />
               <span>New Cluster</span>

@@ -96,7 +96,7 @@ export default function MobileNav({
             <Regbutton type="Login" variant="outline" />
             <Regbutton
               type="Sign Up"
-              classname="bg-primary dark:bg-background-light dark:text-primary"
+              classname="bg-blue-600 text-white dark:bg-background-light dark:text-primary"
             />
           </div>
         </SheetFooter>
