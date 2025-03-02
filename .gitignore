@@ -44,3 +44,4 @@ next-env.d.ts
 /.clerk/
 
 todo.md
+client.rest

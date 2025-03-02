@@ -1,0 +1,66 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Type {
+  pdf
+  doc
+  docx
+  txt
+  markdown
+  mdx
+  csv
+  xls
+  xlsx
+  ppt
+  pptx
+  json
+  xml
+  yaml
+}
+
+
+model User {
+    id String @id @default(cuid()) /// from clerk
+    email String @unique /// from clerk
+    name String /// from clerk
+    createdAt DateTime @default(now())
+    clusters Cluster[]
+    updatedAt   DateTime  @updatedAt
+}
+// todo: add category to cluster
+model Cluster {
+    id String @id @default(uuid())
+    name String @unique
+    userId String
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    documents Document[]
+    link Link?
+    createdAt DateTime @default(now())
+    updatedAt   DateTime  @updatedAt
+}
+
+model Document {
+    id String @id @default(uuid())
+    name String
+    type Type
+    url String /// from supabase
+    clusterId String
+    cluster Cluster @relation(fields: [clusterId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+    updatedAt   DateTime  @updatedAt
+}
+
+model Link {
+    id String @id @default(uuid())
+    url String
+    clusterId String @unique
+    cluster Cluster @relation(fields: [clusterId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+    updatedAt   DateTime  @updatedAt
+}

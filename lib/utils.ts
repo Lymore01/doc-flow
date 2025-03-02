@@ -25,3 +25,7 @@ export function getFileIcon (file: any){
       return "Microsoft_Word-Logo.wine.png";
   }
 };
+
+export async function generateLink(username: string, clusterId: string){
+  return `https://docx.io/${username}/${clusterId}`;
+}
