@@ -29,6 +29,7 @@ model User {
     id String @id @default(cuid()) /// from clerk
     email String @unique /// from clerk
     name String /// from clerk
+    image String? /// from clerk
     createdAt DateTime @default(now())
     clusters Cluster[]
     updatedAt   DateTime  @updatedAt
