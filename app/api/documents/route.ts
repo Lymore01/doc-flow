@@ -9,14 +9,16 @@ interface Filters {
   type?: Type;
 }
 
+//! Fix: doesn't work with the current implementation
+
 export default function GET(request: Request) {
   try {
     const url = new URL(request.url);
     const searchParams = url.searchParams;
-    const id = searchParams.get("id");
-    const name = searchParams.get("name");
-    const clusterId = searchParams.get("clusterId");
-    const type = searchParams.get("type");
+    const id = url.searchParams.get("id"); // id
+    const name = searchParams.get("name"); //file.pdf
+    const clusterId = searchParams.get("clusterId"); // cluster id
+    const type = searchParams.get("type"); // pdf
 
     let filters: Filters = {};
 
@@ -54,11 +56,11 @@ export default function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const body: { name: string; clusterId: string; type: Type; url: string } =
-      await request.json();
-    const { name, clusterId, type, url } = body;
+    const body: { id: string, name: string; clusterId: string; type: Type; url: string } = await request.json(); //handle in the client side
+    const { id, name, clusterId, type, url } = body;
     const document = await prisma.document.create({
       data: {
+        id,
         name,
         clusterId,
         type,

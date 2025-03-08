@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -28,4 +29,15 @@ export function getFileIcon (file: any){
 
 export async function generateLink(username: string, clusterId: string){
   return `https://docx.io/${username}/${clusterId}`;
+}
+
+export async function getDocumentData({fileUrl}: {fileUrl: string}){
+    const bucketAndPathString = fileUrl.split("/storage/v1/object/public/")[1];
+
+    const bucketName = bucketAndPathString.split("/")[0];
+    const path = bucketAndPathString.split("/")[1];
+
+    const fileExtension = path.split(".").pop()?.toLowerCase() || '';
+
+    return {bucketName, path, fileExtension};
 }
