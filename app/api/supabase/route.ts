@@ -4,8 +4,7 @@ import { deleteDocument, upload } from "../../../supabase/storage/client";
 
 export async function POST(request: Request){
     try {
-        // ! fix: revert to File type
-        const body: {file: string , bucket: string} = await request.json();
+        const body: {file: File , bucket: string} = await request.json();
         const {file, bucket} = body;
 
         const {data, publicURL, error} = await upload({file, bucket});

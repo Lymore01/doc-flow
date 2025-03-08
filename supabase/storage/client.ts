@@ -8,14 +8,14 @@ function getStorage() {
 }
 
 type uploadProps = {
-  file: string; //! fix: revert to File type
+  file: File; //! fix: revert to File type
   bucket: string;
   folder?: string;
 };
 
 export async function upload({ file, bucket, folder }: uploadProps) {
   const storage = getStorage();
-  const fileName: string = file; //! fix: revert to file.name
+  const fileName: string = file.name;
 
   //   validate file type
   const allowedExtensions = ["pdf", "docx", "xlsx", "pptx", "txt"];
