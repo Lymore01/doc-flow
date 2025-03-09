@@ -1,4 +1,4 @@
-import { Edit } from "lucide-react";
+import { Edit, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +16,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DropdownMenuItem } from "./ui/dropdown-menu";
+import { useState } from "react";
 
 const formSchema = z.object({
     documentName: z.string().min(1, { message: "Document name is required" }),
@@ -29,8 +30,14 @@ export default function EditDocument({ documentName }: { documentName: string })
     },
   });
 
+  const [loading, setLoading] = useState(false);
+
   const onSubmit = (values: z.infer<typeof formSchema>) => {
+    setLoading(true);
     console.log("Document name: ", values);
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
   };
 
   return (
@@ -69,9 +76,11 @@ export default function EditDocument({ documentName }: { documentName: string })
               ></FormField>
 
               <Separator />
-              <DialogFooter className="flex items-center justify-end gap-2">
+              <DialogFooter className="flex flex-row items-center justify-between md:justify-end gap-2">
                 <Button variant={"outline"}>Cancel</Button>
-                <Button variant={"secondary"} type="submit" form="editDocumentForm">Save</Button>
+                <Button variant={"secondary"} type="submit" form="editDocumentForm" className="bg-blue-600 text-white" disabled={loading}>
+                  {loading ? <div className="flex gap-2 items-center"><Loader2 className="animate-spin"/><span>Saving</span></div> : "Save"}
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>

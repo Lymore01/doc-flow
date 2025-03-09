@@ -21,10 +21,11 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
-import { Edit } from "lucide-react";
+import { Edit, Loader2 } from "lucide-react";
 import Selection from "./selection";
 import { CLUSTER_CATEGORIES } from "../lib/constants";
 import { ClusterCategoryProps } from "./add-cluster-form";
+import { useState } from "react";
 
 const formSchema = z.object({
   clusterName: z.string().min(1, { message: "Cluster name is required" }),
@@ -39,9 +40,14 @@ export default function EditClusterList() {
       clusterCategory:""
     },
   });
+      const [loading, setLoading] = useState(false);
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
+    setLoading(true);
     console.log("values", values);
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
   };
 
   return (
@@ -115,8 +121,10 @@ export default function EditClusterList() {
                 variant="secondary"
                 type="submit"
                 form="editClusterListForm"
+                className="bg-blue-600 text-white"
+                disabled={loading}
               >
-                Save
+                {loading ? <div className="flex gap-2 items-center"><Loader2 className="animate-spin"/><span>Saving</span></div> : "Save"}
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Loader2 } from "lucide-react";
 import { CLUSTER_CATEGORIES } from "../lib/constants";
 import Selection from "./selection";
 import { Button } from "./ui/button";
@@ -23,9 +24,11 @@ export interface ClusterCategoryProps {
 export default function AddClusterForm({
   form,
   onSubmit,
+  loading
 }: {
   form: any;
   onSubmit: (values: any) => void;
+  loading: boolean;
 }) {
   return (
     <Form {...form}>
@@ -36,7 +39,7 @@ export default function AddClusterForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-gray-700 dark:text-gray-300">
-                Name Of Cluster
+                Cluster Name
               </FormLabel>
               <FormControl>
                 <Input
@@ -81,9 +84,11 @@ export default function AddClusterForm({
           )}
         />
         <Separator />
-        <DialogFooter className="flex items-center justify-end gap-2">
+        <DialogFooter className="flex flex-row items-center justify-between md:justify-end gap-2">
           <Button variant={"outline"}>Cancel</Button>
-          <Button variant={"secondary"}>Save</Button>
+          <Button variant={"secondary"} className="bg-blue-600 text-white" disabled={loading}>
+            {loading ? <div className="flex gap-2 items-center"><Loader2 className="animate-spin"/><span>Saving</span></div> : "Save"}
+          </Button>
         </DialogFooter>
       </form>
     </Form>

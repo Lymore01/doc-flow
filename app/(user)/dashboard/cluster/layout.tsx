@@ -10,6 +10,7 @@ import { z } from "zod";
 import { useIsMobile } from "../../../../hooks/useMobile";
 import ClusterSection from "../../../../components/cluster-section";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 //TODO: validate cluster name
 const clusterFormSchema = z.object({
@@ -42,16 +43,24 @@ export default function DashboardLayout({
     },
   });
 
+  const [loading, setLoading] = useState(false);
+
   function onSubmit(values: z.infer<typeof clusterFormSchema>) {
     //TODO: api call
+    setLoading(true);
     console.log(values);
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
   }
   return (
     <div className="flex flex-col md:flex-row gap-4 md:gap-0 h-screen">
       {/* mobile view */}
-      {isMobile && isClusterPage && <ClusterSection form={form} onSubmit={onSubmit} />}
+      {isMobile && isClusterPage && (
+        <ClusterSection form={form} onSubmit={onSubmit} loading={loading}/>
+      )}
       {!isMobile && (
-        <ClusterSection form={form} onSubmit={onSubmit} />
+        <ClusterSection form={form} onSubmit={onSubmit} loading={loading} />
       )}
       <Separator orientation="vertical" className="hidden md:flex" />
       <Separator className="flex md:hidden" />

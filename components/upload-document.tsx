@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Plus } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -20,7 +20,7 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { upload } from "../supabase/storage/client";
@@ -39,21 +39,25 @@ export default function UploadDocument() {
     },
   });
 
+  const [loading, setLoading] = useState(false);
+
   const [file, setFile] = useState<File | null>(null);
 
   async function onSubmit(values: z.infer<typeof documentSchema>) {
     try {
+      setLoading(true);
       if (file === null) {
         toast({
           title: "No document selected",
           description: "Please select a document to upload.",
           variant: "destructive",
         });
+        setLoading(false);
         return;
       }
-  
+
       const { publicURL, error } = await upload({ file, bucket: "docx" });
-  
+
       if (error) {
         toast({
           title: "Failed to upload document",
@@ -62,27 +66,31 @@ export default function UploadDocument() {
         });
         return;
       }
-  
+
       form.setValue("url", publicURL);
-  
+
+      setLoading(false);
+
       toast({
         title: "Document uploaded",
         description: "Your document has been uploaded successfully!",
       });
-  
+
       console.log("Document url", publicURL); //debug
     } catch (err) {
       toast({
         title: "Unexpected Error",
-        description: (err instanceof Error ? err.message : "Something went wrong."),
+        description:
+          err instanceof Error ? err.message : "Something went wrong.",
         variant: "destructive",
       });
+      setLoading(false);
     } finally {
       setFile(null);
       form.reset();
+      setLoading(false);
     }
   }
-  
 
   return (
     <Form {...form}>
@@ -136,8 +144,9 @@ export default function UploadDocument() {
                 type="submit"
                 form="documentForm"
                 className="bg-blue-600 text-white"
+                disabled={loading}
               >
-                <span>Submit</span>
+                {loading ? <div className="flex gap-2 items-center"><Loader2 className="animate-spin"/><span>Uploading</span></div> : "Upload"}
               </Button>
             </DialogFooter>
           </DialogContent>

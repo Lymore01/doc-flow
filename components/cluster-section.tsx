@@ -34,9 +34,11 @@ import { cn } from "../lib/utils";
 export default function ClusterSection({
   form,
   onSubmit,
+  loading
 }: {
   form: any;
   onSubmit: (values: any) => void;
+  loading: boolean
 }) {
   const [clusterName, setClusterName] = useState<string>("");
   const filteredData = CLUSTERS.filter((cluster) =>
@@ -87,7 +89,7 @@ export default function ClusterSection({
             </DialogHeader>
             <Separator />
             <div>
-              <AddClusterForm form={form} onSubmit={onSubmit} />
+              <AddClusterForm form={form} onSubmit={onSubmit} loading={loading}/>
             </div>
           </DialogContent>
         </Dialog>

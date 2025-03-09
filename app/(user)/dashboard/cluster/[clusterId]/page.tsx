@@ -176,15 +176,15 @@ export default function ClusterPage({
             ) : (
               filteredDocs.map((doc) => (
                 <div key={doc.id}>
-                  <div
-                    className="flex items-center justify-between gap-4 text-sm hover:font-semibold transition-all cursor-pointer px-4"
-                    onClick={() => {
-                      router.push(
-                        `/dashboard/cluster/${clusterId}/document/${doc.id}`
-                      );
-                    }}
-                  >
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between gap-4 text-sm hover:font-semibold transition-all cursor-pointer px-4">
+                    <div
+                      className="flex items-center gap-2"
+                      onClick={() => {
+                        router.push(
+                          `/dashboard/cluster/${clusterId}/document/${doc.id}`
+                        );
+                      }}
+                    >
                       <Image
                         src={doc.logo}
                         alt={doc.type}
