@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Plus } from "lucide-react";
 import {
   Dialog,
@@ -22,22 +23,66 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { upload } from "../supabase/storage/client";
+import { toast } from "../hooks/use-toast";
+import { useState } from "react";
 
 const documentSchema = z.object({
-  document: z.any(),
+  url: z.any(),
 });
 
 export default function UploadDocument() {
   const form = useForm<z.infer<typeof documentSchema>>({
     resolver: zodResolver(documentSchema),
     defaultValues: {
-      document: null,
+      url: null,
     },
   });
 
-  function onSubmit(values: z.infer<typeof documentSchema>) {
-    console.log("Uploaded Document", values.document);
+  const [file, setFile] = useState<File | null>(null);
+
+  async function onSubmit(values: z.infer<typeof documentSchema>) {
+    try {
+      if (file === null) {
+        toast({
+          title: "No document selected",
+          description: "Please select a document to upload.",
+          variant: "destructive",
+        });
+        return;
+      }
+  
+      const { publicURL, error } = await upload({ file, bucket: "docx" });
+  
+      if (error) {
+        toast({
+          title: "Failed to upload document",
+          description: error || "An unknown error occurred.",
+          variant: "destructive",
+        });
+        return;
+      }
+  
+      form.setValue("url", publicURL);
+  
+      toast({
+        title: "Document uploaded",
+        description: "Your document has been uploaded successfully!",
+      });
+  
+      console.log("Document url", publicURL); //debug
+    } catch (err) {
+      toast({
+        title: "Unexpected Error",
+        description: (err instanceof Error ? err.message : "Something went wrong."),
+        variant: "destructive",
+      });
+    } finally {
+      setFile(null);
+      form.reset();
+    }
   }
+  
 
   return (
     <Form {...form}>
@@ -62,28 +107,18 @@ export default function UploadDocument() {
             <Separator />
 
             <FormField
-              name="document"
+              name="url"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel htmlFor="document">Document</FormLabel>
+                  <FormLabel htmlFor="url">Document</FormLabel>
                   <FormControl>
                     <Dropzone
                       onDrop={async (acceptedFiles) => {
                         console.log("Dropped File:", acceptedFiles[0]);
                         if (acceptedFiles[0]) {
+                          setFile(acceptedFiles[0]);
                           field.onChange(acceptedFiles[0]);
                         }
-                      }}
-                      accept={{
-                        "application/pdf": [],
-                        "application/msword": [],
-                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-                          [],
-                        "application/vnd.ms-excel": [],
-                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-                          [],
-                        "text/plain": [],
-                        "text/markdown": [],
                       }}
                       form={form}
                     ></Dropzone>
@@ -96,7 +131,12 @@ export default function UploadDocument() {
             <Separator />
 
             <DialogFooter>
-              <Button variant={"secondary"} type="submit" form="documentForm" className="bg-blue-600 text-white">
+              <Button
+                variant={"secondary"}
+                type="submit"
+                form="documentForm"
+                className="bg-blue-600 text-white"
+              >
                 <span>Submit</span>
               </Button>
             </DialogFooter>

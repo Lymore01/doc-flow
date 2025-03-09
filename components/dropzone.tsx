@@ -7,45 +7,67 @@ import Image from "next/image";
 import React, { ChangeEvent, useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { getFileIcon } from "../lib/utils";
+import { toast } from "../hooks/use-toast";
+import { upload } from "../supabase/storage/client";
 
 interface DropzoneProps {
   onDrop: (acceptedFiles: File[]) => void;
-  accept: any;
   children?: React.ReactNode;
   form?: any;
 }
 
-const Dropzone: React.FC<DropzoneProps> = ({ onDrop, accept, children }) => {
-  const [mediaPreview, setMediaPreview] = useState<any>(null);
+const ACCEPTED_FILE_TYPES = {
+  "application/pdf": [],
+  "application/msword": [],
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+    [],
+  "application/vnd.ms-excel": [],
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [],
+  "text/plain": [],
+  "text/markdown": [],
+}
 
-  const documentDropCallback = useCallback((_: any) => {
-    //upload document to supabase
-  }, []);
+const Dropzone: React.FC<DropzoneProps> = ({ onDrop, children, form }) => {
+  const [mediaPreview, setMediaPreview] = useState<any | null>(null);
 
-  // Todo: validate the type of file uploaded
+  //! fix: remove this function
+  const documentUploadCallback = useCallback(
+    async (file: File) => {
+      const fileName: string = file.name;
+
+      if(!fileName){
+        return;
+      }
+
+      console.log("Document url from dropzone", fileName); //debug
+    },
+    []
+  );
+
   const onDropCallback = useCallback(
     (acceptedFiles: File[]) => {
       onDrop(acceptedFiles);
+
       if (acceptedFiles[0]) {
-        setMediaPreview(acceptedFiles[0]);
-        documentDropCallback(acceptedFiles[0]);
+        const file = acceptedFiles[0];
+
+        setMediaPreview(file);
+
+        documentUploadCallback(file);
       }
     },
-    [documentDropCallback, onDrop]
+    [documentUploadCallback, onDrop]
   );
 
   const { getRootProps, isDragActive } = useDropzone({
     onDrop: onDropCallback,
-    accept: {
-      [accept]: [],
-    },
+    accept: ACCEPTED_FILE_TYPES
   });
 
   const removeMedia = async () => {
-    //    remove from supaase
+    //    remove from supabase
     setMediaPreview(null);
   };
-
 
   return (
     <div
@@ -97,7 +119,7 @@ const Dropzone: React.FC<DropzoneProps> = ({ onDrop, accept, children }) => {
                 <input
                   type="file"
                   className="hidden"
-                  accept={accept}
+                  accept={Object.keys(ACCEPTED_FILE_TYPES).join(",")}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => {
                     const file = e.target.files?.[0];
                     if (file) {

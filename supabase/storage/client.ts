@@ -8,7 +8,7 @@ function getStorage() {
 }
 
 type uploadProps = {
-  file: File; //! fix: revert to File type
+  file: File;
   bucket: string;
   folder?: string;
 };

@@ -23,6 +23,7 @@ export default function RootLayout({
     <ClerkProvider
     signInUrl="/login"
     signUpUrl="/signup"
+    signInForceRedirectUrl={"/dashboard"}
     >
       <html lang="en">
         <body className={`${poppins.variable} antialiased`}>
