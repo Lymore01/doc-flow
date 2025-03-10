@@ -12,7 +12,7 @@ import { ArrowRight } from "lucide-react";
 
 export default function Cluster() {
   return (
-    <div className="w-full h-full items-center justify-center flex max-h-screen overflow-hidden p-4">
+    <div className="w-full h-full items-center justify-center flex max-h-screen overflow-hidden p-2 md:p-4">
       <Card className="bg-secondary p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
         <CardHeader className="space-y-2">
           <CardTitle className="text-xl font-bold">
@@ -29,7 +29,7 @@ export default function Cluster() {
           </p>
           <Link
             href="/dashboard/cluster"
-            className="inline-flex items-center gap-2 text-primary hover:underline text-sm font-medium"
+            className="inline-flex items-center gap-2 text-primary hover:underline text-sm font-medium hidden"
           >
             <ArrowRight size={16} />
             Learn more about clusters

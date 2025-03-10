@@ -5,8 +5,7 @@ import ClusterPage from "../page";
 import { useIsMobile } from "../../../../../../hooks/useMobile";
 import { useParams } from "next/navigation";
 import { Separator } from "../../../../../../components/ui/separator";
-import { Button } from "../../../../../../components/ui/button";
-import { Edit } from "lucide-react";
+import EditDocument from "../../../../../../components/edit-document";
 
 export default function DocumentLayout({
   children,
@@ -33,10 +32,7 @@ const MobileLayout = ({
     <div className="flex flex-col gap-4 h-screen overflow-auto">
       <div className="flex items-center justify-between w-full md:w-auto">
         <h1 className="px-4">Document {docId}</h1>
-        <Button variant={"secondary"} className="flex md:hidden gap-2">
-          <Edit />
-          <span>Edit</span>
-        </Button>
+        <EditDocument documentName={docId as unknown as string} isDropDown={false} />
       </div>
 
       <Separator />
@@ -45,5 +41,3 @@ const MobileLayout = ({
     </div>
   );
 };
-
-// todo: make sure the page is responsive

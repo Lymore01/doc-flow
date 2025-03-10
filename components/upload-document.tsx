@@ -40,6 +40,7 @@ export default function UploadDocument() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const [file, setFile] = useState<File | null>(null);
 
@@ -69,12 +70,14 @@ export default function UploadDocument() {
 
       form.setValue("url", publicURL);
 
+      setIsSubmitted(true)
       setLoading(false);
 
       toast({
         title: "Document uploaded",
         description: "Your document has been uploaded successfully!",
       });
+
 
       console.log("Document url", publicURL); //debug
     } catch (err) {
@@ -129,6 +132,8 @@ export default function UploadDocument() {
                         }
                       }}
                       form={form}
+                      isSubmitted={isSubmitted} // boolean
+                      setIsSubmitted={setIsSubmitted}
                     ></Dropzone>
                   </FormControl>
                   <FormMessage />

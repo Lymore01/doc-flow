@@ -4,7 +4,7 @@
 
 import { CloudUpload, Trash2 } from "lucide-react";
 import Image from "next/image";
-import React, { ChangeEvent, useCallback, useState } from "react";
+import React, { ChangeEvent, Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { getFileIcon } from "../lib/utils";
 import { toast } from "../hooks/use-toast";
@@ -14,35 +14,39 @@ interface DropzoneProps {
   onDrop: (acceptedFiles: File[]) => void;
   children?: React.ReactNode;
   form?: any;
+  isSubmitted: boolean;
+  setIsSubmitted: Dispatch<SetStateAction<boolean>>
 }
 
 const ACCEPTED_FILE_TYPES = {
   "application/pdf": [],
   "application/msword": [],
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-    [],
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [],
   "application/vnd.ms-excel": [],
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [],
   "text/plain": [],
   "text/markdown": [],
-}
+};
 
-const Dropzone: React.FC<DropzoneProps> = ({ onDrop, children, form }) => {
+const Dropzone: React.FC<DropzoneProps> = ({
+  onDrop,
+  children,
+  form,
+  isSubmitted,
+  setIsSubmitted,
+}) => {
   const [mediaPreview, setMediaPreview] = useState<any | null>(null);
 
   //! fix: remove this function
-  const documentUploadCallback = useCallback(
-    async (file: File) => {
-      const fileName: string = file.name;
+  const documentUploadCallback = useCallback(async (file: File) => {
+    const fileName: string = file.name;
 
-      if(!fileName){
-        return;
-      }
+    if (!fileName) {
+      return;
+    }
 
-      console.log("Document url from dropzone", fileName); //debug
-    },
-    []
-  );
+    console.log("Document url from dropzone", fileName); //debug
+  }, []);
 
   const onDropCallback = useCallback(
     (acceptedFiles: File[]) => {
@@ -61,7 +65,7 @@ const Dropzone: React.FC<DropzoneProps> = ({ onDrop, children, form }) => {
 
   const { getRootProps, isDragActive } = useDropzone({
     onDrop: onDropCallback,
-    accept: ACCEPTED_FILE_TYPES
+    accept: ACCEPTED_FILE_TYPES,
   });
 
   const removeMedia = async () => {
@@ -69,8 +73,17 @@ const Dropzone: React.FC<DropzoneProps> = ({ onDrop, children, form }) => {
     setMediaPreview(null);
   };
 
+  useEffect(() => {
+    if (isSubmitted) {
+      setMediaPreview(null); //! fix: works only after reloading the page
+      setIsSubmitted(false)
+    }
+    return;
+  }, [isSubmitted, setIsSubmitted]);
+
   return (
     <div
+
       {...getRootProps()}
       className={`border-2 border-dashed rounded-lg p-4 text-center transition-all ${
         isDragActive ? "border-primary" : "border"

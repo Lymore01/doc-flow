@@ -1,7 +1,11 @@
+"use client"
+
 import Link from "next/link";
 import { Card } from "../../../components/ui/card";
 import { ArrowRight } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
 
+//! fix: fetch the data from the backend
 const STATS = [
   {
     title: "Total Clusters",
@@ -24,9 +28,10 @@ const STATS = [
 ];
 
 export default function Dashboard() {
+  const {user} = useUser();
   return (
     <div className="p-4 flex flex-col">
-      <h1 className="text-xl">Hi, Kelly Limo</h1>
+      <h1 className="text-xl">Hi, {user?.firstName} {user?.lastName}</h1>
       <p className="text-[0.8rem] text-muted-foreground">
         Your dashboard provides an overview of all your clusters, documents and links.
       </p>

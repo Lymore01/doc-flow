@@ -4,16 +4,16 @@ import { useParams, useRouter } from "next/navigation";
 import { Separator } from "../../../../../components/ui/separator";
 import { Button } from "../../../../../components/ui/button";
 import {
+  Check,
   ChevronDown,
   Clipboard,
   CopyIcon,
-  Edit,
   EllipsisVertical,
   RefreshCcw,
   Search,
   Trash,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { DOCS } from "../../../../../lib/constants";
 import Image from "next/image";
 import {
@@ -43,20 +43,47 @@ import { useToast } from "../../../../../hooks/use-toast";
 import { Input } from "../../../../../components/ui/input";
 import UploadDocument from "../../../../../components/upload-document";
 import EditDocument from "../../../../../components/edit-document";
+import EditCluster from "../../../../../components/edit-cluster";
 
 export default function ClusterPage({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const linkref = useRef<HTMLParagraphElement>(null);
   const router = useRouter();
   const { clusterId } = useParams();
   const { toast } = useToast();
   const [documentName, setDocumentName] = useState<string>("");
+  const [isCopied, setIsCopied] = useState<boolean>(false);
 
   const filteredDocs = DOCS.filter((doc) =>
     doc.name.toLowerCase().includes(documentName.toLowerCase())
   );
+
+  async function handleCopyToClipboard() {
+    try {
+      await navigator.clipboard.writeText(
+        linkref.current ? linkref.current.innerHTML : ""
+      ); //! fix: only works on **https**
+      setIsCopied(true);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: `Failed to copy url: ${(error as Error).message}`,
+        variant: "destructive",
+      });
+    }
+  }
+
+  useEffect(() => {
+    if (isCopied) {
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 3000);
+    }
+    return;
+  }, [isCopied]);
 
   // TODO: fetch from db
   return (
@@ -65,10 +92,7 @@ export default function ClusterPage({
       <div className="text-lg py-4 px-6 flex flex-wrap justify-between items-center gap-3">
         <div className="flex items-center justify-between w-full md:w-auto">
           <span className="text-xl font-semibold">Cluster {clusterId}</span>
-          <Button variant={"secondary"} className="flex md:hidden gap-2">
-            <Edit />
-            <span>Edit</span>
-          </Button>
+          <EditCluster clusterName={clusterId as string} isDropDown={false}/>
         </div>
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
           <div className="flex items-center border rounded-lg w-full md:w-auto">
@@ -136,20 +160,25 @@ export default function ClusterPage({
 
               <DialogFooter>
                 <div className="flex items-center justify-between w-full">
-                  <p className="text-sm">docX.io/kellylimo</p>
+                  <p className="text-sm" ref={linkref}>
+                    docX.io/kellylimo
+                  </p>
                   <Button
                     variant="secondary"
-                    onClick={() => {
-                      toast({
-                        title: "Success",
-                        description: "Link Copied Successfully",
-                        variant: "default",
-                      });
-                    }}
+                    onClick={handleCopyToClipboard}
                     className="bg-blue-600 text-white"
                   >
-                    <CopyIcon size={16} />
-                    <span>Copy Url</span>
+                    {isCopied ? (
+                      <>
+                        <Check size={16} />
+                        <span>Copied</span>
+                      </>
+                    ) : (
+                      <>
+                        <CopyIcon size={16} />
+                        <span>Copy Url</span>
+                      </>
+                    )}
                   </Button>
                 </div>
               </DialogFooter>
@@ -200,7 +229,7 @@ export default function ClusterPage({
                         <EllipsisVertical size={16} />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent side="right">
-                        <EditDocument documentName={doc.name} />
+                        <EditDocument documentName={doc.name}/>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="group">
                           <span className="flex gap-2 w-full group-hover:text-[red]">
