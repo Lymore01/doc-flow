@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "../components/theme-provider";
-import localFont from 'next/font/local'
+import localFont from "next/font/local";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "../components/ui/toaster";
+import { ReactQueryProvider } from "../lib/react-query-provider";
 
 const poppins = localFont({
   src: "./fonts/Poppins/Poppins-Medium.ttf",
@@ -22,9 +23,9 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider
-    signInUrl="/login"
-    signUpUrl="/signup"
-    signInForceRedirectUrl={"/dashboard"}
+      signInUrl="/login"
+      signUpUrl="/signup"
+      signInForceRedirectUrl={"/dashboard"}
     >
       <html lang="en">
         <body className={`${poppins.variable} antialiased`}>
@@ -34,7 +35,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {children}
+            <ReactQueryProvider>{children}</ReactQueryProvider>
             <Toaster />
           </ThemeProvider>
         </body>
