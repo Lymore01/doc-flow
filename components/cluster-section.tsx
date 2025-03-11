@@ -19,7 +19,8 @@ import {
 import AddClusterForm from "./add-cluster-form";
 import { Input } from "./ui/input";
 import { useState } from "react";
-import { CLUSTERS } from "../lib/constants";
+import { useQuery } from "@tanstack/react-query";
+import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import {
   DropdownMenu,
@@ -30,20 +31,49 @@ import {
 } from "./ui/dropdown-menu";
 import EditCluster from "./edit-cluster";
 import { cn } from "../lib/utils";
+import { Cluster } from "./types/types";
+import { Skeleton } from "./ui/skeleton";
 
 export default function ClusterSection({
   form,
   onSubmit,
-  loading
+  loading,
 }: {
   form: any;
   onSubmit: (values: any) => void;
-  loading: boolean
+  loading: boolean;
 }) {
   const [clusterName, setClusterName] = useState<string>("");
-  const filteredData = CLUSTERS.filter((cluster) =>
+
+  const { user } = useUser();
+
+  // fetch from the server
+  const {
+    data: fetchedClusters,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ["clusters", user?.id],
+    queryFn: async () => {
+      if (user?.id) {
+        //! fix: update the user id to be dynamic
+        const response = await fetch(
+          "/api/clusters?userId=user_29w83sxmDNGwOuEthce5gg56FcC"
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch dashboard data.");
+        }
+        return response.json();
+      }
+      throw new Error("User ID is undefined.");
+    },
+  });
+
+  const filteredData = fetchedClusters?.clusters?.filter((cluster: Cluster) =>
     cluster.name.toLowerCase().includes(clusterName.toLowerCase())
   );
+
+  if (error) return <p>Error loading clusters.</p>;
 
   return (
     <div className="w-full md:w-1/4 max-h-screen">
@@ -89,7 +119,11 @@ export default function ClusterSection({
             </DialogHeader>
             <Separator />
             <div>
-              <AddClusterForm form={form} onSubmit={onSubmit} loading={loading}/>
+              <AddClusterForm
+                form={form}
+                onSubmit={onSubmit}
+                loading={loading}
+              />
             </div>
           </DialogContent>
         </Dialog>
@@ -115,12 +149,24 @@ export default function ClusterSection({
         <h1>My Clusters</h1>
         {/* clusters */}
         <div className="space-y-2 ">
-          {filteredData.length === 0 ? (
+          {isLoading && (
+            <div className="w-full py-2 rounded-lg hover:font-semibold cursor-pointer text-sm transition-all flex justify-between items-center">
+              <Skeleton className="w-40 h-8" />
+              <div className="flex gap-2 items-center">
+                {/* tag */}
+                <Skeleton className="w-16 h-8 rounded-full" />
+                <Skeleton className="w-2 h-8" />
+              </div>
+            </div>
+          )}
+          {filteredData?.length === 0 ? (
             <div className="p-4 flex items-center justify-center">
-              <span className="text-sm">Oops, Cluster Not Found!</span>
+              <span className="text-sm">
+                Oops, Clusters Not Found, Please Create One!
+              </span>
             </div>
           ) : (
-            filteredData.map((cluster) => (
+            filteredData?.map((cluster: Cluster) => (
               <div
                 className="w-full py-2 rounded-lg hover:font-semibold cursor-pointer text-sm transition-all flex justify-between items-center"
                 key={cluster.id}
@@ -132,7 +178,7 @@ export default function ClusterSection({
                   {cluster.name}
                 </Link>
                 <div className="flex gap-2 items-center">
-                  <Tag title={cluster.visibility} />
+                  <Tag title={"Public"} />
                   {/* actions */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>

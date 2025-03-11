@@ -14,7 +14,6 @@ import {
   Trash,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
-import { DOCS } from "../../../../../lib/constants";
 import Image from "next/image";
 import {
   DropdownMenu,
@@ -44,6 +43,12 @@ import { Input } from "../../../../../components/ui/input";
 import UploadDocument from "../../../../../components/upload-document";
 import EditDocument from "../../../../../components/edit-document";
 import EditCluster from "../../../../../components/edit-cluster";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Skeleton } from "../../../../../components/ui/skeleton";
+import { Document } from "../../../../../components/types/types";
+import { getFileIcon } from "../../../../../lib/utils";
+import { deleteDocument } from "../../../../../supabase/storage/client";
+import { AxiosError } from "axios";
 
 export default function ClusterPage({
   children,
@@ -57,7 +62,94 @@ export default function ClusterPage({
   const [documentName, setDocumentName] = useState<string>("");
   const [isCopied, setIsCopied] = useState<boolean>(false);
 
-  const filteredDocs = DOCS.filter((doc) =>
+  const { mutateAsync } = useMutation({
+    mutationFn: async (data: { id: string }) => {
+      try {
+        const response = await fetch(`/api/documents/${data.id}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to upload document");
+        }
+        return response.json();
+      } catch (error) {
+        let errorMessage = "An unknown error occurred.";
+        if (error instanceof AxiosError) {
+          errorMessage = error?.response?.data?.error || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+    },
+    onSuccess: () => {
+      toast({
+        title: "Document Deleted Successfully!",
+        description: "Document has been deleted successfully.",
+      });
+    },
+    onError: (error: unknown) => {
+      let errorMessage = "An unexpected error occurred.";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      toast({
+        variant: "destructive",
+        title: "Document deletion Failed",
+        description: errorMessage,
+      });
+    },
+  });
+
+  useEffect(() => {
+    if (isCopied) {
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 3000);
+    }
+    return;
+  }, [isCopied]);
+
+  // ! fix
+  const { data: clusterData, isLoading: isClusterLoading } = useQuery({
+    queryKey: ["clusterName", clusterId],
+    queryFn: async () => {
+      if (clusterId) {
+        const response = await fetch(`/api/clusters/${clusterId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch clusters.");
+        }
+        return response.json();
+      }
+      throw new Error("Cluster ID is undefined.");
+    },
+    enabled: !!clusterId,
+  });
+
+  const {
+    data: fetchedDocuments,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ["documents", clusterId],
+    queryFn: async () => {
+      if (clusterId) {
+        const response = await fetch(`/api/documents?clusterId=${clusterId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch documents.");
+        }
+        return response.json();
+      }
+      throw new Error("Cluster ID is undefined.");
+    },
+    enabled: !!clusterId,
+  });
+
+  if (error) return <p>Error loading documents.</p>;
+
+  const filteredDocs = fetchedDocuments?.documents?.filter((doc: Document) =>
     doc.name.toLowerCase().includes(documentName.toLowerCase())
   );
 
@@ -76,14 +168,40 @@ export default function ClusterPage({
     }
   }
 
-  useEffect(() => {
-    if (isCopied) {
-      setTimeout(() => {
-        setIsCopied(false);
-      }, 3000);
+  async function handleDocumentDelete(fileUrl: string) {
+    try {
+      if (!fileUrl) {
+        toast({
+          title: "Invalid file URL",
+          description: "Please provide a valid file URL to delete.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { data, error } = await deleteDocument({ fileUrl });
+
+      if (error || !data) {
+        toast({
+          title: "Failed to delete document",
+          description:
+            error || "Something went wrong while deleting the document.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      await mutateAsync(data[0]);
+      
+    } catch (err) {
+      toast({
+        title: "Unexpected Error",
+        description:
+          err instanceof Error ? err.message : "Something went wrong.",
+        variant: "destructive",
+      });
     }
-    return;
-  }, [isCopied]);
+  }
 
   // TODO: fetch from db
   return (
@@ -91,8 +209,11 @@ export default function ClusterPage({
       {/* Header */}
       <div className="text-lg py-4 px-6 flex flex-wrap justify-between items-center gap-3">
         <div className="flex items-center justify-between w-full md:w-auto">
-          <span className="text-xl font-semibold">Cluster {clusterId}</span>
-          <EditCluster clusterName={clusterId as string} isDropDown={false}/>
+          <span className="text-xl font-semibold truncate w-[200px]">
+            {isClusterLoading && <Skeleton className="w-40 h-8" />}
+            {clusterData?.cluster.name}
+          </span>
+          <EditCluster clusterName={clusterId as string} isDropDown={false} />
         </div>
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
           <div className="flex items-center border rounded-lg w-full md:w-auto">
@@ -119,7 +240,7 @@ export default function ClusterPage({
             <span>Reload</span>
           </Button>
 
-          <UploadDocument />
+          <UploadDocument clusterId={clusterId as string} />
 
           <Separator orientation="vertical" className="hidden md:block" />
 
@@ -198,12 +319,22 @@ export default function ClusterPage({
 
           <Separator />
           <div className="py-4 space-y-4">
-            {filteredDocs.length === 0 ? (
+            {isLoading && (
+              <div className="w-full py-2 px-4 rounded-lg hover:font-semibold cursor-pointer text-sm transition-all flex justify-between items-center">
+                <div className="flex gap-2 items-center">
+                  <Skeleton className="w-8 h-8" />
+                  <Skeleton className="w-40 h-8" />
+                </div>
+
+                <Skeleton className="w-2 h-8" />
+              </div>
+            )}
+            {filteredDocs?.length === 0 ? (
               <div className="p-4 flex items-center justify-center">
                 <span className="text-sm">Oops, Document Not Found!</span>
               </div>
             ) : (
-              filteredDocs.map((doc) => (
+              filteredDocs?.map((doc: Document) => (
                 <div key={doc.id}>
                   <div className="flex items-center justify-between gap-4 text-sm hover:font-semibold transition-all cursor-pointer px-4">
                     <div
@@ -215,8 +346,10 @@ export default function ClusterPage({
                       }}
                     >
                       <Image
-                        src={doc.logo}
-                        alt={doc.type}
+                        src={`/images/${getFileIcon({
+                          name: `logo.${doc.type}`,
+                        })}`}
+                        alt={doc.type.toString()}
                         width={100}
                         height={100}
                         className="h-7 w-8"
@@ -229,9 +362,14 @@ export default function ClusterPage({
                         <EllipsisVertical size={16} />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent side="right">
-                        <EditDocument documentName={doc.name}/>
+                        <EditDocument documentName={doc.name} />
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="group">
+                        <DropdownMenuItem
+                          className="group"
+                          onClick={() => {
+                            handleDocumentDelete(doc.url);
+                          }}
+                        >
                           <span className="flex gap-2 w-full group-hover:text-[red]">
                             <Trash size={16} />
                             <span>Delete</span>

@@ -11,7 +11,7 @@ interface Filters {
 
 //! Fix: doesn't work with the current implementation
 
-export default function GET(request: Request) {
+export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
     const searchParams = url.searchParams;
@@ -19,6 +19,7 @@ export default function GET(request: Request) {
     const name = searchParams.get("name"); //file.pdf
     const clusterId = searchParams.get("clusterId"); // cluster id
     const type = searchParams.get("type"); // pdf
+    const userId = searchParams.get("userId");
 
     let filters: Filters = {};
 
@@ -30,16 +31,37 @@ export default function GET(request: Request) {
       filters["clusterId"] = clusterId;
     } else if (type) {
       filters["type"] = type as Type;
+    } else if (userId) {
+      const clusters = await prisma.cluster.findMany({
+        where: {
+          userId: userId,
+        },
+        include: {
+          documents: true,
+          link: true,
+        },
+      });
+
+      return NextResponse.json(
+        {
+          message: "Documents fetched!",
+
+          documents: clusters.map((cluster) => cluster.documents),
+        },
+        { status: 200 }
+      );
     } else {
       filters = {};
     }
 
-    const documents = prisma.document.findMany({
+    const documents = await prisma.document.findMany({
       where: filters,
       orderBy: {
         name: "asc",
       },
     });
+
+    console.log(filters);
 
     return NextResponse.json(
       { message: "Documents Fetched!", documents },
@@ -56,7 +78,13 @@ export default function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const body: { id: string, name: string; clusterId: string; type: Type; url: string } = await request.json(); //handle in the client side
+    const body: {
+      id: string;
+      name: string;
+      clusterId: string;
+      type: Type;
+      url: string;
+    } = await request.json(); //handle in the client side
     const { id, name, clusterId, type, url } = body;
     const document = await prisma.document.create({
       data: {

@@ -13,7 +13,7 @@ type uploadProps = {
   folder?: string;
 };
 
-export async function upload({ file, bucket, folder }: uploadProps) {
+export async function upload({ file, bucket, folder}: uploadProps) {
   const storage = getStorage();
   const fileName: string = file.name;
 
@@ -42,23 +42,6 @@ export async function upload({ file, bucket, folder }: uploadProps) {
     .from(bucket)
     .getPublicUrl(`${folder ? folder + "/" : ""}${fileName}`);
 
-  if (publicURL) {
-    axiosInstance
-      .post("/api/documents", {
-        id: data.id,
-        name: fileName,
-        clusterId: "492d22cd-124c-474b-902f-90d9a330c00a",
-        type: fileExtension,
-        url: publicURL.data.publicUrl,
-      })
-      .then((res) => {
-        console.log("Document uploaded successfully!", res.data);
-      })
-      .catch((error) => {
-        console.error("Error uploading document!", error);
-      });
-  }
-
   return { data, publicURL, error: "" };
 }
 
@@ -69,19 +52,6 @@ export async function deleteDocument({ fileUrl }: { fileUrl: string }) {
   const { bucketName, path } = await getDocumentData({ fileUrl });
 
   const { data, error } = await storage.from(bucketName).remove([path]);
-
-  if (data) {
-    console.log("Deleted document data id: ", data[0].id);
-    //   delete document from database
-    axiosInstance
-      .delete(`/api/documents/${data[0].id}`)
-      .then((res) => {
-        console.log("Document deleted successfully!", res.data);
-      })
-      .catch((error) => {
-        console.error("Error deleting document!", error);
-      });
-  }
 
   if (error) throw error;
 

@@ -20,18 +20,20 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { upload } from "../supabase/storage/client";
 import { toast } from "../hooks/use-toast";
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 
 const documentSchema = z.object({
   url: z.any(),
 });
 
-export default function UploadDocument() {
+export default function UploadDocument({ clusterId }: { clusterId: string }) {
   const form = useForm<z.infer<typeof documentSchema>>({
     resolver: zodResolver(documentSchema),
     defaultValues: {
@@ -43,6 +45,54 @@ export default function UploadDocument() {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const [file, setFile] = useState<File | null>(null);
+
+  const { isPending, mutateAsync } = useMutation({
+    mutationFn: async (data: {
+      id: string;
+      name: string;
+      clusterId: string;
+      type: string;
+      url: string;
+    }) => {
+      try {
+        const response = await fetch(`/api/documents`, {
+          method: "POST",
+          body: JSON.stringify(data),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (!response.ok) {
+          throw new Error("Failed to upload document");
+        }
+        return response.json();
+      } catch (error) {
+        let errorMessage = "An unknown error occurred.";
+        if (error instanceof AxiosError) {
+          errorMessage = error?.response?.data?.error || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+    },
+    onSuccess: () => {
+      toast({
+        title: "Document Uploaded Successfully!",
+        description: "Document has been added successfully.",
+      });
+      form.reset();
+    },
+    onError: (error: unknown) => {
+      let errorMessage = "An unexpected error occurred.";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      toast({
+        variant: "destructive",
+        title: "Document Upload Failed",
+        description: errorMessage,
+      });
+    },
+  });
 
   async function onSubmit(values: z.infer<typeof documentSchema>) {
     try {
@@ -57,9 +107,12 @@ export default function UploadDocument() {
         return;
       }
 
-      const { publicURL, error } = await upload({ file, bucket: "docx" });
+      const { data, publicURL, error } = await upload({
+        file,
+        bucket: "docx",
+      });
 
-      if (error) {
+      if (error || !data) {
         toast({
           title: "Failed to upload document",
           description: error || "An unknown error occurred.",
@@ -68,15 +121,22 @@ export default function UploadDocument() {
         return;
       }
 
-      form.setValue("url", publicURL);
+      form.setValue("url", publicURL.data.publicUrl);
 
-      setIsSubmitted(true)
-      setLoading(false);
+      const fileExtension = file.name
+        ? (file.name.split(".").pop() || "").toLowerCase()
+        : "";
 
-      toast({
-        title: "Document uploaded",
-        description: "Your document has been uploaded successfully!",
+      await mutateAsync({
+        id: data.id,
+        name: file.name,
+        clusterId: clusterId,
+        type: fileExtension,
+        url: publicURL.data.publicUrl,
       });
+
+      setIsSubmitted(true);
+      setLoading(false);
 
 
       console.log("Document url", publicURL); //debug
@@ -151,7 +211,14 @@ export default function UploadDocument() {
                 className="bg-blue-600 text-white"
                 disabled={loading}
               >
-                {loading ? <div className="flex gap-2 items-center"><Loader2 className="animate-spin"/><span>Uploading</span></div> : "Upload"}
+                {loading ? (
+                  <div className="flex gap-2 items-center">
+                    <Loader2 className="animate-spin" />
+                    <span>Uploading</span>
+                  </div>
+                ) : (
+                  "Upload"
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
