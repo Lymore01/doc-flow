@@ -73,7 +73,7 @@ export default function ClusterPage({
         });
 
         if (!response.ok) {
-          throw new Error("Failed to upload document");
+          throw new Error("Failed to delete document");
         }
         return response.json();
       } catch (error) {
@@ -134,6 +134,7 @@ export default function ClusterPage({
     isLoading,
   } = useQuery({
     queryKey: ["documents", clusterId],
+    refetchInterval: 3000,
     queryFn: async () => {
       if (clusterId) {
         const response = await fetch(`/api/documents?clusterId=${clusterId}`);
@@ -213,7 +214,7 @@ export default function ClusterPage({
             {isClusterLoading && <Skeleton className="w-40 h-8" />}
             {clusterData?.cluster.name}
           </span>
-          <EditCluster clusterName={clusterId as string} isDropDown={false} />
+          <EditCluster clusterName={clusterData?.cluster.name} isDropDown={false} />
         </div>
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
           <div className="flex items-center border rounded-lg w-full md:w-auto">
@@ -251,7 +252,7 @@ export default function ClusterPage({
                 className="w-full md:w-auto flex items-center gap-2 bg-blue-600 text-white"
               >
                 <Clipboard size={16} />
-                <span>Get Url</span>
+                <span></span>
               </Button>
             </DialogTrigger>
 

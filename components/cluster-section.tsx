@@ -19,7 +19,7 @@ import {
 import AddClusterForm from "./add-cluster-form";
 import { Input } from "./ui/input";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import {
@@ -33,6 +33,8 @@ import EditCluster from "./edit-cluster";
 import { cn } from "../lib/utils";
 import { Cluster } from "./types/types";
 import { Skeleton } from "./ui/skeleton";
+import { AxiosError } from "axios";
+import { toast } from "../hooks/use-toast";
 
 export default function ClusterSection({
   form,
@@ -44,8 +46,56 @@ export default function ClusterSection({
   loading: boolean;
 }) {
   const [clusterName, setClusterName] = useState<string>("");
+  const [documentToDelete, setDocumentToDelete]  = useState(null);
 
   const { user } = useUser();
+
+  const { isPending: isPendingDelete, mutateAsync } = useMutation({
+    mutationFn: async (id: string) => {
+      try {
+        const response = await fetch(`/api/clusters/${id}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to delete cluster");
+        }
+        return response.json();
+      } catch (error) {
+        let errorMessage = "An unknown error occurred.";
+        if (error instanceof AxiosError) {
+          errorMessage = error?.response?.data?.error || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+    },
+    onSuccess: () => {
+      toast({
+        title: "Cluster Deleted Successfully!",
+        description: "Cluster has been deleted successfully.",
+      });
+    },
+    onError: (error: unknown) => {
+      let errorMessage = "An unexpected error occurred.";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      toast({
+        variant: "destructive",
+        title: "Cluster deletion Failed",
+        description: errorMessage,
+      });
+    },
+  });
+
+  // delete cluster
+  async function handleClusterDelete(id: string) {
+    setDocumentToDelete(id)
+    await mutateAsync(id);
+  }
 
   // fetch from the server
   const {
@@ -54,12 +104,11 @@ export default function ClusterSection({
     isLoading,
   } = useQuery({
     queryKey: ["clusters", user?.id],
+    refetchInterval: 3000,
     queryFn: async () => {
       if (user?.id) {
         //! fix: update the user id to be dynamic
-        const response = await fetch(
-          "/api/clusters?userId=user_29w83sxmDNGwOuEthce5gg56FcC"
-        );
+        const response = await fetch(`/api/clusters?userId=${user.id}`);
         if (!response.ok) {
           throw new Error("Failed to fetch dashboard data.");
         }
@@ -173,7 +222,10 @@ export default function ClusterSection({
               >
                 <Link
                   href={`/dashboard/cluster/${cluster.id}`}
-                  className="capitalize"
+                  className={cn(
+                    "capitalize transition-opacity",
+                    isPendingDelete && documentToDelete === cluster.id ? "opacity-40 text-red-600" : ""
+                  )}
                 >
                   {cluster.name}
                 </Link>
@@ -186,10 +238,18 @@ export default function ClusterSection({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent side="right">
                       {/* edit cluster name */}
-                      <EditCluster clusterName={cluster.name} />
+                      <EditCluster
+                        clusterName={cluster.name}
+                        cluster_id={cluster.id}
+                      />
 
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem className="group">
+                      <DropdownMenuItem
+                        className="group"
+                        onClick={() => {
+                          handleClusterDelete(cluster.id);
+                        }}
+                      >
                         <span className="flex gap-2 w-full group-hover:text-[red]">
                           <Trash size={16} />
                           <span>Delete cluster</span>

@@ -27,6 +27,9 @@ export async function GET(request: Request) {
       filter["name"] = name;
     } else if(userId){
         filter["userId"] = userId;
+    }else if(name && userId){
+      filter["name"] = name;
+      filter["userId"] = userId; 
     }else {
       filter = {};
     }

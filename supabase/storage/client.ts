@@ -1,4 +1,3 @@
-import axiosInstance from "../../lib/axios";
 import { getDocumentData } from "../../lib/utils";
 import { createSupabaseClient } from "../client";
 

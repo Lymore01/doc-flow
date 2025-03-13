@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Loader2 } from "lucide-react";
-import { CLUSTER_CATEGORIES } from "../lib/constants";
-import Selection from "./selection";
 import { Button } from "./ui/button";
 import { DialogFooter } from "./ui/dialog";
 import {
@@ -52,33 +50,6 @@ export default function AddClusterForm({
               <FormDescription>
                 Cluster name should only contain: numbers, hyphen and string
               </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="clusterCategory"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel htmlFor="clusterCategory">Cluster Category</FormLabel>
-              <FormControl>
-                <Selection
-                  items={CLUSTER_CATEGORIES.map(
-                    (category: ClusterCategoryProps) => category.name
-                  )}
-                  onValueChange={(value: string) => {
-                    const category = CLUSTER_CATEGORIES.find(
-                      (obj: ClusterCategoryProps) =>
-                        obj.name.toLowerCase() === value.toLowerCase()
-                    );
-                    if (category) {
-                      field.onChange(category.name);
-                    }
-                  }}
-                  label={"Category"}
-                />
-              </FormControl>
               <FormMessage />
             </FormItem>
           )}
