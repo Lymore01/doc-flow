@@ -43,12 +43,13 @@ import { Input } from "../../../../../components/ui/input";
 import UploadDocument from "../../../../../components/upload-document";
 import EditDocument from "../../../../../components/edit-document";
 import EditCluster from "../../../../../components/edit-cluster";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "../../../../../components/ui/skeleton";
 import { Document } from "../../../../../components/types/types";
-import { getFileIcon } from "../../../../../lib/utils";
+import { cn, getFileIcon } from "../../../../../lib/utils";
 import { deleteDocument } from "../../../../../supabase/storage/client";
 import { AxiosError } from "axios";
+import { useUser } from "@clerk/nextjs";
 
 export default function ClusterPage({
   children,
@@ -61,8 +62,15 @@ export default function ClusterPage({
   const { toast } = useToast();
   const [documentName, setDocumentName] = useState<string>("");
   const [isCopied, setIsCopied] = useState<boolean>(false);
+  const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
 
-  const { mutateAsync } = useMutation({
+  const queryClient = useQueryClient();
+
+  const { user } = useUser();
+
+  const [isRefLoading, setIsRefLoading] = useState(false);
+
+  const { isPending: isPendingDelete, mutateAsync } = useMutation({
     mutationFn: async (data: { id: string }) => {
       try {
         const response = await fetch(`/api/documents/${data.id}`, {
@@ -89,6 +97,7 @@ export default function ClusterPage({
         title: "Document Deleted Successfully!",
         description: "Document has been deleted successfully.",
       });
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
     },
     onError: (error: unknown) => {
       let errorMessage = "An unexpected error occurred.";
@@ -132,23 +141,32 @@ export default function ClusterPage({
     data: fetchedDocuments,
     error,
     isLoading,
+    refetch: refetchDocuments,
   } = useQuery({
-    queryKey: ["documents", clusterId],
-    refetchInterval: 3000,
+    queryKey: ["documents", user?.id],
     queryFn: async () => {
-      if (clusterId) {
-        const response = await fetch(`/api/documents?clusterId=${clusterId}`);
+      if (user?.id) {
+        const response = await fetch(`/api/documents?userId=${user.id}&clusterId=${clusterId}`);
         if (!response.ok) {
           throw new Error("Failed to fetch documents.");
         }
         return response.json();
       }
-      throw new Error("Cluster ID is undefined.");
+      throw new Error("User ID is undefined.");
     },
-    enabled: !!clusterId,
+    enabled: !!user?.id,
   });
 
   if (error) return <p>Error loading documents.</p>;
+
+  const handleReloadClick = async () => {
+    setIsRefLoading(true);
+    try {
+      await refetchDocuments();
+    } finally {
+      setIsRefLoading(false);
+    }
+  };
 
   const filteredDocs = fetchedDocuments?.documents?.filter((doc: Document) =>
     doc.name.toLowerCase().includes(documentName.toLowerCase())
@@ -181,6 +199,7 @@ export default function ClusterPage({
       }
 
       const { data, error } = await deleteDocument({ fileUrl });
+      // alert(fileUrl)
 
       if (error || !data) {
         toast({
@@ -191,9 +210,8 @@ export default function ClusterPage({
         });
         return;
       }
-
+      setDocumentToDelete(fileUrl);
       await mutateAsync(data[0]);
-      
     } catch (err) {
       toast({
         title: "Unexpected Error",
@@ -214,7 +232,10 @@ export default function ClusterPage({
             {isClusterLoading && <Skeleton className="w-40 h-8" />}
             {clusterData?.cluster.name}
           </span>
-          <EditCluster clusterName={clusterData?.cluster.name} isDropDown={false} />
+          <EditCluster
+            clusterName={clusterData?.cluster.name}
+            isDropDown={false}
+          />
         </div>
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
           <div className="flex items-center border rounded-lg w-full md:w-auto">
@@ -235,9 +256,15 @@ export default function ClusterPage({
 
           <Button
             variant="secondary"
-            className="w-full md:w-auto flex items-center gap-2"
+            className={`w-full md:w-auto flex items-center gap-2  ${isRefLoading ? "hover:bg-blue-600 hover:text-white" : "hover:bg-secondary"}`}
+            onClick={handleReloadClick}
           >
-            <RefreshCcw size={16} />
+            <RefreshCcw
+              size={16}
+              className={`transition-transform ${
+                isRefLoading ? "animate-spin" : ""
+              }`}
+            />
             <span>Reload</span>
           </Button>
 
@@ -252,7 +279,7 @@ export default function ClusterPage({
                 className="w-full md:w-auto flex items-center gap-2 bg-blue-600 text-white"
               >
                 <Clipboard size={16} />
-                <span></span>
+                <span>Get URL</span>
               </Button>
             </DialogTrigger>
 
@@ -260,7 +287,7 @@ export default function ClusterPage({
               <DialogHeader>
                 <DialogTitle>Get Url</DialogTitle>
                 <DialogDescription>
-                  This Url contains all the documents in cluster {clusterId}
+                  This Url contains all the documents in cluster &quot;{`${clusterData?.cluster.name}`}&quot;
                 </DialogDescription>
               </DialogHeader>
 
@@ -332,19 +359,24 @@ export default function ClusterPage({
             )}
             {filteredDocs?.length === 0 ? (
               <div className="p-4 flex items-center justify-center">
-                <span className="text-sm">Oops, Document Not Found!</span>
+                <span className="text-sm">Oops, Documents Not Found, Please Upload One!</span>
               </div>
             ) : (
               filteredDocs?.map((doc: Document) => (
                 <div key={doc.id}>
                   <div className="flex items-center justify-between gap-4 text-sm hover:font-semibold transition-all cursor-pointer px-4">
                     <div
-                      className="flex items-center gap-2"
                       onClick={() => {
                         router.push(
                           `/dashboard/cluster/${clusterId}/document/${doc.id}`
                         );
                       }}
+                      className={cn(
+                        "flex items-center gap-2 transition-opacity",
+                        isPendingDelete && documentToDelete === doc.url
+                          ? "opacity-40 text-red-600"
+                          : ""
+                      )}
                     >
                       <Image
                         src={`/images/${getFileIcon({

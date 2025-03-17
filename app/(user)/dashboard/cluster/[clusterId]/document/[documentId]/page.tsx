@@ -1,32 +1,43 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
-
-// import DocumentViewer from "../../../../../../../components/document-viewer";
+import { useParams } from "next/navigation";
 
 export default function Document() {
-  const [loading, setLoading] = useState(true);
+  const { documentId } = useParams();
 
-  const handleLoad = () => {
-    setLoading(false);
-  };
+  const { data: fetchedDocuments, isLoading, error } = useQuery({
+    queryKey: ["Document", documentId],
+    queryFn: async () => {
+      if (documentId) {
+        const response = await fetch(`/api/documents/${documentId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch document.");
+        }
+        return response.json();
+      }
+      throw new Error("Document ID is undefined.");
+    },
+    enabled: !!documentId,
+  });
+
+  if (error) return <p>Error loading document.</p>;
 
   return (
     <div className="w-full h-full">
-      {loading && (
+      {isLoading && (
         <div className="w-full h-[500px] flex justify-center items-center">
           <Loader2 className="animate-spin stroke-blue-600" size={36} />
         </div>
       )}
       <iframe
         className="pdf"
-        src="https://hadtozrdfpxfhiyjfdln.supabase.co/storage/v1/object/public/docx//Lecture%203%20Entrepreneurship%20and%20Technology.pdf"
+        src={`https://view.officeapps.live.com/op/view.aspx?src=${decodeURIComponent(fetchedDocuments?.document.url)}`}
         width="100%"
         height="100%"
         style={{ border: "none" }}
         allowFullScreen
-        onLoad={handleLoad}
       ></iframe>
     </div>
   );

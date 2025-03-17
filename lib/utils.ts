@@ -35,7 +35,7 @@ export async function getDocumentData({fileUrl}: {fileUrl: string}){
     const bucketAndPathString = fileUrl.split("/storage/v1/object/public/")[1];
 
     const bucketName = bucketAndPathString.split("/")[0];
-    const path = bucketAndPathString.split("/")[1];
+    const path = decodeURIComponent(bucketAndPathString.split("/")[1]);
 
     const fileExtension = path.split(".").pop()?.toLowerCase() || '';
 

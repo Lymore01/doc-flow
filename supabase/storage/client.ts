@@ -54,6 +54,9 @@ export async function deleteDocument({ fileUrl }: { fileUrl: string }) {
 
   if (error) throw error;
 
+
+  console.log("Data after deleting: ", data)
+
   return { message: "File deleted successfully!", data, error: "" };
 }
 

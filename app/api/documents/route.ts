@@ -46,7 +46,7 @@ export async function GET(request: Request) {
         {
           message: "Documents fetched!",
 
-          documents: clusters.map((cluster) => cluster.documents),
+          documents: clusters.map((cluster) => cluster.documents)[0],
         },
         { status: 200 }
       );

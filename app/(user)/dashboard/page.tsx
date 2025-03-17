@@ -34,7 +34,7 @@ export default function Dashboard() {
       if (user?.id) {
         //! fix: update the user id to be dynamic
         const response = await fetch(
-          "/api/dashboard?userId=user_29w83sxmDNGwOuEthce5gg56FcC"
+          `/api/dashboard?userId=${user.id}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch dashboard data.");

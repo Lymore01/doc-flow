@@ -19,7 +19,7 @@ import {
 import AddClusterForm from "./add-cluster-form";
 import { Input } from "./ui/input";
 import { useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import {
@@ -46,9 +46,11 @@ export default function ClusterSection({
   loading: boolean;
 }) {
   const [clusterName, setClusterName] = useState<string>("");
-  const [documentToDelete, setDocumentToDelete]  = useState(null);
+  const [clusterToDelete, setClusterToDelete]  = useState<string | null>(null);
 
   const { user } = useUser();
+    const queryClient = useQueryClient()
+  
 
   const { isPending: isPendingDelete, mutateAsync } = useMutation({
     mutationFn: async (id: string) => {
@@ -77,6 +79,8 @@ export default function ClusterSection({
         title: "Cluster Deleted Successfully!",
         description: "Cluster has been deleted successfully.",
       });
+      queryClient.invalidateQueries({ queryKey: ['clusters']});
+
     },
     onError: (error: unknown) => {
       let errorMessage = "An unexpected error occurred.";
@@ -93,7 +97,7 @@ export default function ClusterSection({
 
   // delete cluster
   async function handleClusterDelete(id: string) {
-    setDocumentToDelete(id)
+    setClusterToDelete(id);
     await mutateAsync(id);
   }
 
@@ -104,7 +108,7 @@ export default function ClusterSection({
     isLoading,
   } = useQuery({
     queryKey: ["clusters", user?.id],
-    refetchInterval: 3000,
+    // refetchInterval: 3000,
     queryFn: async () => {
       if (user?.id) {
         //! fix: update the user id to be dynamic
@@ -224,7 +228,7 @@ export default function ClusterSection({
                   href={`/dashboard/cluster/${cluster.id}`}
                   className={cn(
                     "capitalize transition-opacity",
-                    isPendingDelete && documentToDelete === cluster.id ? "opacity-40 text-red-600" : ""
+                    isPendingDelete && clusterToDelete === cluster.id ? "opacity-40 text-red-600" : ""
                   )}
                 >
                   {cluster.name}

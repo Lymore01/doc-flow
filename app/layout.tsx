@@ -26,12 +26,13 @@ export default function RootLayout({
       signInUrl="/login"
       signUpUrl="/signup"
       signInForceRedirectUrl={"/dashboard"}
+      signUpFallbackRedirectUrl={"/dashboard"}
     >
       <html lang="en">
         <body className={`${poppins.variable} antialiased`}>
           <ThemeProvider
             attribute="class"
-            defaultTheme="system"
+            defaultTheme="light"
             enableSystem
             disableTransitionOnChange
           >

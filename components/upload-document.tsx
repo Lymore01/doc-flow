@@ -26,7 +26,7 @@ import { z } from "zod";
 import { upload } from "../supabase/storage/client";
 import { toast } from "../hooks/use-toast";
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
 const documentSchema = z.object({
@@ -45,6 +45,7 @@ export default function UploadDocument({ clusterId }: { clusterId: string }) {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const [file, setFile] = useState<File | null>(null);
+  const queryClient = useQueryClient();
 
   const { isPending, mutateAsync } = useMutation({
     mutationFn: async (data: {
@@ -79,6 +80,8 @@ export default function UploadDocument({ clusterId }: { clusterId: string }) {
         title: "Document Uploaded Successfully!",
         description: "Document has been added successfully.",
       });
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+
       form.reset();
     },
     onError: (error: unknown) => {
@@ -137,7 +140,6 @@ export default function UploadDocument({ clusterId }: { clusterId: string }) {
 
       setIsSubmitted(true);
       setLoading(false);
-
 
       console.log("Document url", publicURL); //debug
     } catch (err) {

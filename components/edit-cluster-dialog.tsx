@@ -53,7 +53,7 @@ export default function EditClusterDialog({
               <FormControl>
                 <Input
                   type="text"
-                  placeholder="Enter new cluster name"
+                  placeholder={clusterName}
                   className="rounded-md border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500"
                   {...field}
                 />

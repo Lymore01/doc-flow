@@ -29,7 +29,7 @@ export default function EditCluster({
     },
   });
 
-  const { setQueryData } = useQueryClient()
+  const queryClient = useQueryClient()
 
   const { clusterId }  = useParams();
 
@@ -55,17 +55,15 @@ export default function EditCluster({
         throw new Error(errorMessage);
       }
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       
       toast({
         title: "Cluster Name Updated Successfully!",
         description: "Cluster name has been changed successfully.",
       });
-
-      setQueryData(['cluster', data.name], (oldData) => {
-        return oldData ? { ...oldData, ...data } : data; 
-      });
-
+      queryClient.invalidateQueries({ queryKey: ['clusters']});
+      queryClient.invalidateQueries({ queryKey: ['clusterName']});
+      
       form.reset();
     },
     onError: (error: unknown) => {

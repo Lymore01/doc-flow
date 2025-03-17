@@ -1,23 +1,56 @@
-import { useState } from "react";
-import { DOCS } from "../lib/constants";
-import { Grip } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Grip, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useUser } from "@clerk/nextjs";
+import { useParams } from "next/navigation";
 
-interface ItemProp {
-  id: number,
-  name: string,
-  type:string,
-  logo:string
+interface DocProps {
+  id: string;
+  name: string;
+  type: string;
+  url: string;
 }
 
 export default function MoveDocuments() {
-  const [draggedItem, setDraggedItem] = useState<ItemProp | null>(null);
-  const [Items, setItems] = useState<ItemProp[]>(DOCS);
+  const [draggedItem, setDraggedItem] = useState<DocProps | null>(null);
+  const [Items, setItems] = useState<DocProps[]>([]);
 
-  const handleDragStart = (item:ItemProp) => {
+  const { user } = useUser();
+  const {clusterId} = useParams();
+
+  const {
+    data: fetchedDocuments,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["documents", user?.id],
+    queryFn: async () => {
+      if (user?.id) {
+        const response = await fetch(`/api/documents?userId=${user.id}&clusterId=${clusterId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch documents.");
+        }
+        return response.json();
+      }
+      throw new Error("User ID is undefined.");
+    },
+    enabled: !!user?.id,
+  });
+
+  useEffect(() => {
+    if (fetchedDocuments) {
+      setItems(fetchedDocuments.documents);
+    }
+  }, [fetchedDocuments]);
+
+  const handleDragStart = (item: DocProps) => {
     setDraggedItem(item);
   };
 
-  const handleDragOver = (event:React.DragEvent<HTMLDivElement>, item:ItemProp) => {
+  const handleDragOver = (
+    event: React.DragEvent<HTMLDivElement>,
+    item: DocProps
+  ) => {
     const draggedOver = Items.indexOf(item);
     event.preventDefault();
     const draggedIndex = draggedItem ? Items.indexOf(draggedItem) : null;
@@ -33,7 +66,7 @@ export default function MoveDocuments() {
     }
   };
 
-  const handleDrop = (event:React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setDraggedItem(null);
   };
@@ -42,15 +75,27 @@ export default function MoveDocuments() {
     setDraggedItem(null);
   };
 
+  if (error) return <span>Error fetching documents</span>;
+
   return (
     <div className="mt-4">
-      {Items.map((doc) => (
+      {isLoading  && (
+        <div className="w-full h-[100px] flex justify-center items-center">
+          <Loader2 className="animate-spin stroke-blue-600" size={36} />
+        </div>
+      )}
+      {Items.length === 0 && (
+        <div className="w-full h-[100px] flex items-center justify-center">
+          <span>No documents found!</span>
+        </div>
+      )}
+      {Items.map((doc: DocProps) => (
         <div
           key={doc.id}
           className="flex gap-2 items-center"
           draggable
           onDragOver={(event) => handleDragOver(event, doc)}
-          onDrop={(event)=>handleDrop(event)}
+          onDrop={(event) => handleDrop(event)}
           onDragStart={() => handleDragStart(doc)}
           onDragEnd={handleDragEnd}
         >

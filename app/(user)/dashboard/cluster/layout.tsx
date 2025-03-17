@@ -11,7 +11,7 @@ import { useIsMobile } from "../../../../hooks/useMobile";
 import ClusterSection from "../../../../components/cluster-section";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { toast } from "../../../../hooks/use-toast";
 import { useUser } from "@clerk/nextjs";
@@ -46,6 +46,8 @@ export default function DashboardLayout({
     },
   });
 
+    const queryClient = useQueryClient()
+  
 
   // create a cluster
   const { isPending, mutateAsync } = useMutation({
@@ -75,6 +77,7 @@ export default function DashboardLayout({
         title: "Cluster Created Successfully!",
         description: "Cluster has been added successfully.",
       });
+      queryClient.invalidateQueries({ queryKey: ['clusters']});
       form.reset();
     },
     onError: (error: unknown) => {
