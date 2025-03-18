@@ -9,15 +9,13 @@ interface Filters {
   type?: Type;
 }
 
-//! Fix: doesn't work with the current implementation
-
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
     const searchParams = url.searchParams;
     const id = url.searchParams.get("id"); // id
     const name = searchParams.get("name"); //file.pdf
-    const clusterId = searchParams.get("clusterId"); // cluster id
+    const clusterId = searchParams.get("clusterId");
     const type = searchParams.get("type"); // pdf
     const userId = searchParams.get("userId");
 
@@ -28,7 +26,31 @@ export async function GET(request: Request) {
     } else if (name) {
       filters["name"] = name;
     } else if (clusterId) {
-      filters["clusterId"] = clusterId;
+      const documents = await prisma.clusterDocument.findMany({
+        where: {
+          clusterId,
+        },
+        include: {
+          document: true
+        }
+      });
+      if (!documents) {
+        return NextResponse.json(
+          {
+            message: "Document not found!",
+          },
+          {
+            status: 400,
+          }
+        );
+      }
+
+      return NextResponse.json({
+        message: `Document from cluster ${clusterId} Fetched!`, documents
+      }, {
+        status: 200
+      })
+
     } else if (type) {
       filters["type"] = type as Type;
     } else if (userId) {
@@ -84,21 +106,65 @@ export async function POST(request: Request) {
       clusterId: string;
       type: Type;
       url: string;
-    } = await request.json(); //handle in the client side
+    } = await request.json();
     const { id, name, clusterId, type, url } = body;
-    
-    const document = await prisma.document.create({
-      data: {
+
+    if (!id || !clusterId) {
+      return NextResponse.json(
+        { message: "Id and clusterId are required!" },
+        { status: 400 }
+      );
+    }
+
+    const doesDocumentExist = await prisma.document.findUnique({
+      where: {
         id,
-        name,
-        clusterId,
-        type,
-        url,
       },
     });
 
+    if (!doesDocumentExist) {
+      const document = await prisma.document.create({
+        data: {
+          id,
+          name,
+          type,
+          url,
+        },
+      });
+
+      if (!document) {
+        return NextResponse.json(
+          { message: "Document creation failed!" },
+          { status: 400 }
+        );
+      }
+    }
+
+    const doesClusterDocumentExist = await prisma.clusterDocument.findFirst({
+      where: {
+        clusterId,
+        documentId: id,
+      },
+    });
+
+    if (!doesClusterDocumentExist) {
+      const clusterDocument = await prisma.clusterDocument.create({
+        data: {
+          clusterId,
+          documentId: id, // FK linking to the document
+        },
+      });
+
+      if (!clusterDocument) {
+        return NextResponse.json(
+          { message: "ClusterDocument creation failed!" },
+          { status: 400 }
+        );
+      }
+    }
+
     return NextResponse.json(
-      { message: "Document Created!", document },
+      { message: "Document and/or ClusterDocument created successfully!" },
       { status: 200 }
     );
   } catch (error) {
@@ -109,3 +175,4 @@ export async function POST(request: Request) {
     );
   }
 }
+

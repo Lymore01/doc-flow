@@ -16,7 +16,11 @@ export async function GET(
       },
       include: {
         user: true,
-        documents: true,
+        documents: {
+          include: {
+            document: true
+          }
+        },
         link: true,
       },
     });
@@ -94,7 +98,11 @@ export async function DELETE(
       where: { id },
       select: {
         documents: {
-          select: { url: true },
+          select: {
+            document: {
+              select: { url: true },
+            }
+          }
         },
       },
     });
@@ -110,10 +118,10 @@ export async function DELETE(
     if (clusterToDelete.documents.length > 0) {
       await Promise.all(
         clusterToDelete.documents.map(async (doc) => {
-          if (doc.url) {
+          if (doc.document.url) {
             try {
-              await deleteDocument({ fileUrl: doc.url });
-              console.log(`Successfully deleted document: ${doc.url}`);
+              await deleteDocument({ fileUrl: doc.document.url });
+              console.log(`Successfully deleted document: ${doc.document.url}`);
             } catch (error) {
               console.error("Error deleting document from Supabase:", error);
             }
@@ -140,7 +148,3 @@ export async function DELETE(
   }
 }
 
-
-
-// use promises on async ops and api calls
-// for each is concurrent hence you cant use async and await init

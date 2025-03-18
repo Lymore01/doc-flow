@@ -37,7 +37,11 @@ export async function GET(request: Request) {
       where: filter,
       include: {
         user: true,
-        documents: true,
+        documents: {
+          include: {
+            document:true
+          }
+        },
         link: true,
       },
       orderBy: {
