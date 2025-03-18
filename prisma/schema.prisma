@@ -40,10 +40,11 @@ model Cluster {
     name String @unique
     userId String
     user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-    documents Document[]
+    // documents Document[]
     link Link?
     createdAt DateTime @default(now())
     updatedAt   DateTime  @updatedAt
+    documents ClusterDocument[]
 }
 
 model Document {
@@ -52,11 +53,22 @@ model Document {
     type Type
     url String /// from supabase
     clusterId String
-    cluster Cluster @relation(fields: [clusterId], references: [id], onDelete: Cascade)
+    // cluster Cluster @relation(fields: [clusterId], references: [id], onDelete: Cascade)
     createdAt DateTime @default(now())
     updatedAt   DateTime  @updatedAt
+    clusters ClusterDocument[]
+}
+
+// create cluster doc join table
+model ClusterDocument {
+  id String @id @default(uuid())
+  clusterId String
+  documentId String
+  cluster Cluster @relation(fields: [clusterId], references: [id], onDelete: Cascade)
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
 }
  
+
 model Link {
     id String @id @default(uuid())
     url String

@@ -86,6 +86,7 @@ export async function POST(request: Request) {
       url: string;
     } = await request.json(); //handle in the client side
     const { id, name, clusterId, type, url } = body;
+    
     const document = await prisma.document.create({
       data: {
         id,

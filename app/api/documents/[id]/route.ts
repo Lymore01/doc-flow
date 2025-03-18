@@ -83,6 +83,7 @@ export async function PUT(
   }
 }
 
+// only delete the document from supabase if there are no references from other clusters 
 export async function DELETE(
   request: Request,
   {

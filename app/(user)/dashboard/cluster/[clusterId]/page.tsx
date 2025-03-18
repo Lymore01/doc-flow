@@ -198,8 +198,10 @@ export default function ClusterPage({
         return;
       }
 
+      // check if the file exist
+
+
       const { data, error } = await deleteDocument({ fileUrl });
-      // alert(fileUrl)
 
       if (error || !data) {
         toast({
@@ -359,7 +361,7 @@ export default function ClusterPage({
             )}
             {filteredDocs?.length === 0 ? (
               <div className="p-4 flex items-center justify-center">
-                <span className="text-sm">Oops, Documents Not Found, Please Upload One!</span>
+                <span className="text-sm">😅 Oops, nothing here! Start your adventure by uploading a document! 📄</span>
               </div>
             ) : (
               filteredDocs?.map((doc: Document) => (

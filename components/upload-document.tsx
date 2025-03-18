@@ -28,6 +28,7 @@ import { toast } from "../hooks/use-toast";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { v4 as uuidv4 } from "uuid"
 
 const documentSchema = z.object({
   url: z.any(),
@@ -46,6 +47,7 @@ export default function UploadDocument({ clusterId }: { clusterId: string }) {
 
   const [file, setFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
+  const randomUUID = uuidv4();
 
   const { isPending, mutateAsync } = useMutation({
     mutationFn: async (data: {
@@ -115,6 +117,9 @@ export default function UploadDocument({ clusterId }: { clusterId: string }) {
         bucket: "docx",
       });
 
+    // if file already exists update the documents list
+
+
       if (error || !data) {
         toast({
           title: "Failed to upload document",
@@ -131,7 +136,7 @@ export default function UploadDocument({ clusterId }: { clusterId: string }) {
         : "";
 
       await mutateAsync({
-        id: data.id,
+        id: randomUUID,
         name: file.name,
         clusterId: clusterId,
         type: fileExtension,

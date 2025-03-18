@@ -215,7 +215,7 @@ export default function ClusterSection({
           {filteredData?.length === 0 ? (
             <div className="p-4 flex items-center justify-center">
               <span className="text-sm">
-                Oops, Clusters Not Found, Please Create One!
+              😅 Oops, nothing here! Start your adventure by creating a cluster! 📄
               </span>
             </div>
           ) : (
