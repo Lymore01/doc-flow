@@ -1,6 +1,7 @@
 import { Type } from "@prisma/client";
 import { prisma } from "../../../../lib/prisma";
 import { NextResponse } from "next/server";
+import { deleteDocument } from "../../../../supabase/storage/client";
 
 // get post update delete a document
 
@@ -91,7 +92,7 @@ export async function DELETE(
     params: { id: string };
   }
 ) {
-  const id = params.id;
+  const { id } = await params;
   const url = new URL(request.url);
   const searchParams = url.searchParams;
   const clusterId = searchParams.get("clusterId");
@@ -142,14 +143,27 @@ export async function DELETE(
         );
       }
 
+      // delete from supabase
+      const { data, error } = await deleteDocument({ fileUrl: document.url });
+
+      if (error || !data) {
+        return NextResponse.json({ error: error }, { status: 404 }); // error from supabase
+      }
+
       return NextResponse.json(
-        { message: "Document and associated ClusterDocument deleted!", document },
+        {
+          message: "Document and associated ClusterDocument deleted!",
+          document,
+        },
         { status: 200 }
       );
     }
 
     return NextResponse.json(
-      { message: "ClusterDocument deleted, but Document retained due to other references!" },
+      {
+        message:
+          "ClusterDocument deleted, but Document retained due to other references!",
+      },
       { status: 200 }
     );
   } catch (error) {
@@ -160,4 +174,3 @@ export async function DELETE(
     );
   }
 }
-

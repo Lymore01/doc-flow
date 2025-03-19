@@ -11,6 +11,7 @@ import {
 import { Separator } from "./ui/separator";
 import {
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -18,6 +19,7 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import { useState } from "react";
 
 export default function EditClusterDialog({
   clusterName,
@@ -26,8 +28,9 @@ export default function EditClusterDialog({
   clusterName: string;
   loading: boolean
 }) {
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   return (
-    <Dialog>
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}> 
       <DialogTrigger
         asChild
         className="relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0"
@@ -58,6 +61,9 @@ export default function EditClusterDialog({
                   {...field}
                 />
               </FormControl>
+              <FormDescription>
+                Cluster name should only contain: numbers, hyphen and string
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -65,7 +71,7 @@ export default function EditClusterDialog({
 
         <Separator />
         <DialogFooter className="flex flex-row items-center justify-between md:justify-end gap-2">
-          <Button variant={"outline"}>Cancel</Button>
+          <Button variant={"outline"} onClick={()=>setIsDialogOpen(false)}>Cancel</Button>
           <Button
             variant={"secondary"}
             type="submit"

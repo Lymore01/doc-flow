@@ -1,5 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Edit, EllipsisVertical, Info, Search, Trash } from "lucide-react";
+import {
+  
+  Edit,
+  EllipsisVertical,
+  Info,
+ 
+  Search,
+  
+} from "lucide-react";
 import { Button } from "./ui/button";
 import {
   Tooltip,
@@ -35,6 +43,7 @@ import { Cluster } from "./types/types";
 import { Skeleton } from "./ui/skeleton";
 import { AxiosError } from "axios";
 import { toast } from "../hooks/use-toast";
+import { DeleteDialog } from "./delete-dialog";
 
 export default function ClusterSection({
   form,
@@ -46,11 +55,11 @@ export default function ClusterSection({
   loading: boolean;
 }) {
   const [clusterName, setClusterName] = useState<string>("");
-  const [clusterToDelete, setClusterToDelete]  = useState<string | null>(null);
+  const [clusterToDelete, setClusterToDelete] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const { user } = useUser();
-    const queryClient = useQueryClient()
-  
+  const queryClient = useQueryClient();
 
   const { isPending: isPendingDelete, mutateAsync } = useMutation({
     mutationFn: async (id: string) => {
@@ -79,8 +88,7 @@ export default function ClusterSection({
         title: "Cluster Deleted Successfully!",
         description: "Cluster has been deleted successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ['clusters']});
-
+      queryClient.invalidateQueries({ queryKey: ["clusters"] });
     },
     onError: (error: unknown) => {
       let errorMessage = "An unexpected error occurred.";
@@ -128,6 +136,7 @@ export default function ClusterSection({
 
   if (error) return <p>Error loading clusters.</p>;
 
+
   return (
     <div className="w-full md:w-1/4 max-h-screen">
       <div className="text-lg py-4 px-6 flex justify-between items-center">
@@ -151,7 +160,7 @@ export default function ClusterSection({
       <Separator />
       <div className="py-4 px-6 space-y-2">
         {/* add new cluster */}
-        <Dialog>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button
               variant={"secondary"}
@@ -176,6 +185,9 @@ export default function ClusterSection({
                 form={form}
                 onSubmit={onSubmit}
                 loading={loading}
+                onCancel={()=>{
+                  setIsDialogOpen(false)
+                }}
               />
             </div>
           </DialogContent>
@@ -212,10 +224,17 @@ export default function ClusterSection({
               </div>
             </div>
           )}
-          {filteredData?.length === 0 ? (
+          {fetchedClusters?.clusters?.length === 0 ? (
             <div className="p-4 flex items-center justify-center">
-              <span className="text-sm">
-              😅 Oops, nothing here! Start your adventure by creating a cluster! 📄
+              <span className="text-sm text-center text-muted-foreground">
+                😅 Oops, nothing here! Start your adventure by creating a
+                cluster! 📄
+              </span>
+            </div>
+          ) : filteredData?.length === 0 ? (
+            <div className="p-4 flex items-center justify-center">
+              <span className="text-sm text-muted-foreground">
+                Cluster not found!
               </span>
             </div>
           ) : (
@@ -228,7 +247,9 @@ export default function ClusterSection({
                   href={`/dashboard/cluster/${cluster.id}`}
                   className={cn(
                     "capitalize transition-opacity",
-                    isPendingDelete && clusterToDelete === cluster.id ? "opacity-40 text-red-600" : ""
+                    isPendingDelete && clusterToDelete === cluster.id
+                      ? "opacity-40 text-red-600"
+                      : ""
                   )}
                 >
                   {cluster.name}
@@ -248,16 +269,15 @@ export default function ClusterSection({
                       />
 
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        className="group"
-                        onClick={() => {
-                          handleClusterDelete(cluster.id);
-                        }}
-                      >
-                        <span className="flex gap-2 w-full group-hover:text-[red]">
-                          <Trash size={16} />
-                          <span>Delete cluster</span>
-                        </span>
+
+                      <DropdownMenuItem asChild>
+                        <DeleteDialog
+                          entityName="Cluster"
+                          entityId={cluster.id}
+                          onDelete={handleClusterDelete}
+                          isPendingDelete={isPendingDelete}
+                          entityDescription={cluster.name}
+                        />
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -282,15 +302,3 @@ const Tag = ({ title }: { title: string }) => {
     </div>
   );
 };
-// const ClusterSkeleton = () => {
-//   return (
-//     <div className="flex justify-between gap-4 items-center">
-//       {/* name */}
-//       <Skeleton className="w-full h-4 rounded dark:bg-secondary bg-secondary" />
-//       <div className="flex gap-2 items-center">
-//         <Skeleton className="rounded-full h-6 w-10 dark:bg-secondary bg-secondary" />
-//         <Skeleton className="rounded h-4 w-2 dark:bg-secondary bg-secondary" />
-//       </div>
-//     </div>
-//   );
-// };

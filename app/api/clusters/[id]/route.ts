@@ -121,6 +121,12 @@ export async function DELETE(
           if (doc.document.url) {
             try {
               await deleteDocument({ fileUrl: doc.document.url });
+              //delete document
+              await prisma.document.deleteMany({
+                where: {
+                  url: doc.document.url 
+                }
+              })
               console.log(`Successfully deleted document: ${doc.document.url}`);
             } catch (error) {
               console.error("Error deleting document from Supabase:", error);

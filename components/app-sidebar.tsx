@@ -17,13 +17,13 @@ import Image from "next/image";
 import { useIsMobile } from "../hooks/useMobile";
 import { useTheme } from "next-themes";
 import { SignedIn, UserButton } from "@clerk/nextjs";
+import { dark } from "@clerk/themes";
 
 interface SidebarItem {
   title: string;
   url: string;
   icon: React.ReactNode;
 }
-
 
 export default function AppSideBar({ items }: { items: SidebarItem[] }) {
   const { theme } = useTheme();
@@ -76,7 +76,16 @@ export default function AppSideBar({ items }: { items: SidebarItem[] }) {
           <SidebarMenuItem>
             <SidebarMenuButton className="h-auto">
               <SignedIn>
-                <UserButton />
+                <UserButton
+                  appearance={{
+                    baseTheme: theme === "dark" ? dark : undefined,
+                    elements: {
+                      userButtonPopoverCard: {
+                        pointerEvents: "initial",
+                      },
+                    },
+                  }}
+                />
               </SignedIn>
             </SidebarMenuButton>
           </SidebarMenuItem>

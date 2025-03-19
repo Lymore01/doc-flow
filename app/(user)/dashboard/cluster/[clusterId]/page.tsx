@@ -11,7 +11,6 @@ import {
   EllipsisVertical,
   RefreshCcw,
   Search,
-  Trash,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
@@ -47,9 +46,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "../../../../../components/ui/skeleton";
 import { Document } from "../../../../../components/types/types";
 import { cn, getFileIcon } from "../../../../../lib/utils";
-import { deleteDocument } from "../../../../../supabase/storage/client";
 import { AxiosError } from "axios";
 import { useUser } from "@clerk/nextjs";
+import { DeleteDialog } from "../../../../../components/delete-dialog";
 
 export default function ClusterPage({
   children,
@@ -73,12 +72,15 @@ export default function ClusterPage({
   const { isPending: isPendingDelete, mutateAsync } = useMutation({
     mutationFn: async (data: { id: string }) => {
       try {
-        const response = await fetch(`/api/documents/${data.id}`, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await fetch(
+          `/api/documents/${data.id}?clusterId=${clusterId}`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
         if (!response.ok) {
           throw new Error("Failed to delete document");
@@ -146,7 +148,7 @@ export default function ClusterPage({
     queryKey: ["documents", user?.id],
     queryFn: async () => {
       if (user?.id) {
-        const response = await fetch(`/api/documents?userId=${user.id}&clusterId=${clusterId}`);
+        const response = await fetch(`/api/documents?clusterId=${clusterId}`);
         if (!response.ok) {
           throw new Error("Failed to fetch documents.");
         }
@@ -169,7 +171,7 @@ export default function ClusterPage({
   };
 
   const filteredDocs = fetchedDocuments?.documents?.filter((doc: Document) =>
-    doc.name.toLowerCase().includes(documentName.toLowerCase())
+    doc.document.name.toLowerCase().includes(documentName.toLowerCase())
   );
 
   async function handleCopyToClipboard() {
@@ -187,33 +189,21 @@ export default function ClusterPage({
     }
   }
 
-  async function handleDocumentDelete(fileUrl: string) {
+  async function handleDocumentDelete(id: string) {
     try {
-      if (!fileUrl) {
+      if (!id) {
         toast({
-          title: "Invalid file URL",
-          description: "Please provide a valid file URL to delete.",
+          title: "Invalid file id",
+          description: "Please provide a valid file id to delete.",
           variant: "destructive",
         });
         return;
       }
 
-      // check if the file exist
-
-
-      const { data, error } = await deleteDocument({ fileUrl });
-
-      if (error || !data) {
-        toast({
-          title: "Failed to delete document",
-          description:
-            error || "Something went wrong while deleting the document.",
-          variant: "destructive",
-        });
-        return;
-      }
-      setDocumentToDelete(fileUrl);
-      await mutateAsync(data[0]);
+      setDocumentToDelete(id);
+      await mutateAsync({
+        id,
+      });
     } catch (err) {
       toast({
         title: "Unexpected Error",
@@ -228,8 +218,9 @@ export default function ClusterPage({
   return (
     <div className="flex flex-col w-full">
       {/* Header */}
-      <div className="text-lg py-4 px-6 flex flex-wrap justify-between items-center gap-3">
-        <div className="flex items-center justify-between w-full md:w-auto">
+      <div className="text-lg py-4 px-6 flex flex-wrap lg:flex-row justify-between items-center gap-3">
+        {/* dont display on large devices */}
+        <div className="flex md:hidden items-center justify-between w-full lg:w-auto">
           <span className="text-xl font-semibold truncate w-[200px]">
             {isClusterLoading && <Skeleton className="w-40 h-8" />}
             {clusterData?.cluster.name}
@@ -239,8 +230,8 @@ export default function ClusterPage({
             isDropDown={false}
           />
         </div>
-        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-          <div className="flex items-center border rounded-lg w-full md:w-auto">
+        <div className="flex flex-wrap lg:flex-row items-center gap-2 w-full lg:w-auto">
+          <div className="flex items-center border rounded-lg w-full lg:w-auto">
             <Input
               placeholder="Search documents..."
               className="placeholder:text-sm border-none outline-none focus-visible:ring-0 flex-1"
@@ -254,11 +245,15 @@ export default function ClusterPage({
             </div>
           </div>
 
-          <Separator orientation="vertical" className="hidden md:block" />
+          <Separator orientation="vertical" className="hidden lg:block" />
 
           <Button
             variant="secondary"
-            className={`w-full md:w-auto flex items-center gap-2  ${isRefLoading ? "hover:bg-blue-600 hover:text-white" : "hover:bg-secondary"}`}
+            className={`w-full lg:w-auto flex items-center gap-2 ${
+              isRefLoading
+                ? "hover:bg-blue-600 hover:text-white"
+                : "hover:bg-secondary"
+            }`}
             onClick={handleReloadClick}
           >
             <RefreshCcw
@@ -272,13 +267,13 @@ export default function ClusterPage({
 
           <UploadDocument clusterId={clusterId as string} />
 
-          <Separator orientation="vertical" className="hidden md:block" />
+          <Separator orientation="vertical" className="hidden lg:block" />
 
           <Dialog>
             <DialogTrigger asChild>
               <Button
                 variant="secondary"
-                className="w-full md:w-auto flex items-center gap-2 bg-blue-600 text-white"
+                className="w-full lg:w-auto flex items-center gap-2 bg-blue-600 text-white"
               >
                 <Clipboard size={16} />
                 <span>Get URL</span>
@@ -289,7 +284,8 @@ export default function ClusterPage({
               <DialogHeader>
                 <DialogTitle>Get Url</DialogTitle>
                 <DialogDescription>
-                  This Url contains all the documents in cluster &quot;{`${clusterData?.cluster.name}`}&quot;
+                  This Url contains all the documents in cluster &quot;
+                  {`${clusterData?.cluster.name}`}&quot;
                 </DialogDescription>
               </DialogHeader>
 
@@ -359,37 +355,46 @@ export default function ClusterPage({
                 <Skeleton className="w-2 h-8" />
               </div>
             )}
-            {filteredDocs?.length === 0 ? (
+            {fetchedDocuments?.documents?.length === 0 ? (
               <div className="p-4 flex items-center justify-center">
-                <span className="text-sm">😅 Oops, nothing here! Start your adventure by uploading a document! 📄</span>
+                <span className="text-sm text-center text-muted-foreground">
+                  😅 Oops, nothing here! Start your adventure by uploading a
+                  document! 📄
+                </span>
+              </div>
+            ) : filteredDocs?.length === 0 ? (
+              <div className="p-4 flex items-center justify-center">
+                <span className="text-sm text-muted-foreground">
+                  Document not found!
+                </span>
               </div>
             ) : (
               filteredDocs?.map((doc: Document) => (
-                <div key={doc.id}>
+                <div key={doc.document.id}>
                   <div className="flex items-center justify-between gap-4 text-sm hover:font-semibold transition-all cursor-pointer px-4">
                     <div
                       onClick={() => {
                         router.push(
-                          `/dashboard/cluster/${clusterId}/document/${doc.id}`
+                          `/dashboard/cluster/${clusterId}/document/${doc.document.id}`
                         );
                       }}
                       className={cn(
                         "flex items-center gap-2 transition-opacity",
-                        isPendingDelete && documentToDelete === doc.url
+                        isPendingDelete && documentToDelete === doc.document.id
                           ? "opacity-40 text-red-600"
                           : ""
                       )}
                     >
                       <Image
                         src={`/images/${getFileIcon({
-                          name: `logo.${doc.type}`,
+                          name: `logo.${doc.document.type}`,
                         })}`}
-                        alt={doc.type.toString()}
+                        alt={doc.document.type.toString()}
                         width={100}
                         height={100}
                         className="h-7 w-8"
                       />
-                      <p>{doc.name}</p>
+                      <p>{doc.document.name}</p>
                     </div>
                     {/* actions */}
                     <DropdownMenu>
@@ -397,18 +402,15 @@ export default function ClusterPage({
                         <EllipsisVertical size={16} />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent side="right">
-                        <EditDocument documentName={doc.name} />
+                        <EditDocument documentName={doc.document.name} />
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="group"
-                          onClick={() => {
-                            handleDocumentDelete(doc.url);
-                          }}
-                        >
-                          <span className="flex gap-2 w-full group-hover:text-[red]">
-                            <Trash size={16} />
-                            <span>Delete</span>
-                          </span>
+                        <DropdownMenuItem asChild>
+                          <DeleteDialog
+                            entityName="Document"
+                            entityId={doc.document.id}
+                            onDelete={handleDocumentDelete}
+                            entityDescription={doc.document.name}
+                          />
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

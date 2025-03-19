@@ -16,20 +16,20 @@ export type Cluster = {
   userId: string;
   user: User;
   documents: Document[];
-  link?: Link; 
+  link?: Link;
   createdAt: Date;
   updatedAt: Date;
 };
 
 export type Document = {
-  id: string;
-  name: string;
-  type: Type;
-  url: string;
-  clusterId: string;
-  cluster: Cluster;
-  createdAt: Date;
-  updatedAt: Date;
+  document: {
+    id: string;
+    name: string;
+    type: Type;
+    url: string;
+    createdAt: Date;
+    updatedAt: Date;
+  };
 };
 
 export type Link = {

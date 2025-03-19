@@ -43,6 +43,8 @@ import {
   TableRow,
 } from "../../../../components/ui/table";
 import EditClusterList from "../../../../components/edit-cluster-list";
+import { Dialog, DialogContent, DialogHeader } from "../../../../components/ui/dialog";
+import { DialogTrigger } from "@radix-ui/react-dialog";
 
 interface LinkProps {
   id: number;
@@ -167,13 +169,20 @@ const columns: ColumnDef<LinkProps>[] = [
               onClick={() => alert("Delete clicked")}
               className="group"
             >
-              <Button
-                variant="ghost"
-                className="w-full flex gap-2 group-hover:text-[red]"
-              >
-                <Trash size={16} />
-                <span>Delete cluster</span>
-              </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="w-full flex gap-2 group-hover:text-[red]"
+                  >
+                    <Trash size={16} />
+                    <span>Delete cluster</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>Confirm Deletion of cluster</DialogHeader>
+                </DialogContent>
+              </Dialog>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

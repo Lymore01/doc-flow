@@ -22,12 +22,25 @@ export interface ClusterCategoryProps {
 export default function AddClusterForm({
   form,
   onSubmit,
-  loading
+  loading,
+  onCancel
 }: {
   form: any;
   onSubmit: (values: any) => void;
   loading: boolean;
+  onCancel: ()=>void;
 }) {
+
+  async function handleSave(){
+    try {
+      const values = await form.getValues();
+      await onSubmit(values);
+      onCancel();
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -56,8 +69,8 @@ export default function AddClusterForm({
         />
         <Separator />
         <DialogFooter className="flex flex-row items-center justify-between md:justify-end gap-2">
-          <Button variant={"outline"}>Cancel</Button>
-          <Button variant={"secondary"} className="bg-blue-600 text-white" disabled={loading}>
+          <Button variant={"outline"} onClick={onCancel}>Cancel</Button>
+          <Button variant={"secondary"} className="bg-blue-600 text-white" disabled={loading} onClick={handleSave}>
             {loading ? <div className="flex gap-2 items-center"><Loader2 className="animate-spin"/><span>Saving</span></div> : "Save"}
           </Button>
         </DialogFooter>

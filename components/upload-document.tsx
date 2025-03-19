@@ -136,7 +136,7 @@ export default function UploadDocument({ clusterId }: { clusterId: string }) {
         : "";
 
       await mutateAsync({
-        id: randomUUID,
+        id: data.id,
         name: file.name,
         clusterId: clusterId,
         type: fileExtension,

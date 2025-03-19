@@ -69,7 +69,7 @@ export default function DashboardLayout({
         if (error instanceof AxiosError) {
           errorMessage = error?.response?.data?.error || errorMessage;
         }
-        throw new Error(errorMessage);
+        // throw new Error(errorMessage); //!fix: uncomment this in the future
       }
     },
     onSuccess: () => {

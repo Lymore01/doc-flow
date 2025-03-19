@@ -89,7 +89,7 @@ export default function EditCluster({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} id="editClusterForm">
         {!isDropDown ? (
-          <EditClusterDialog clusterName={clusterName} loading={isPending} />
+          <EditClusterDialog clusterName={clusterName} loading={isPending}/>
         ) : (
           <DropdownMenuItem asChild>
             <EditClusterDialog clusterName={clusterName} loading={isPending} />

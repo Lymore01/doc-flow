@@ -5,10 +5,12 @@ import { useUser } from "@clerk/nextjs";
 import { useParams } from "next/navigation";
 
 interface DocProps {
-  id: string;
-  name: string;
-  type: string;
-  url: string;
+  document: {
+    id: string;
+    name: string;
+    type: string;
+    url: string;
+  };
 }
 
 export default function MoveDocuments() {
@@ -16,7 +18,7 @@ export default function MoveDocuments() {
   const [Items, setItems] = useState<DocProps[]>([]);
 
   const { user } = useUser();
-  const {clusterId} = useParams();
+  const { clusterId } = useParams();
 
   const {
     data: fetchedDocuments,
@@ -26,7 +28,7 @@ export default function MoveDocuments() {
     queryKey: ["documents", user?.id],
     queryFn: async () => {
       if (user?.id) {
-        const response = await fetch(`/api/documents?userId=${user.id}&clusterId=${clusterId}`);
+        const response = await fetch(`/api/documents?clusterId=${clusterId}`);
         if (!response.ok) {
           throw new Error("Failed to fetch documents.");
         }
@@ -79,7 +81,7 @@ export default function MoveDocuments() {
 
   return (
     <div className="mt-4">
-      {isLoading  && (
+      {isLoading && (
         <div className="w-full h-[100px] flex justify-center items-center">
           <Loader2 className="animate-spin stroke-blue-600" size={36} />
         </div>
@@ -91,7 +93,7 @@ export default function MoveDocuments() {
       )}
       {Items.map((doc: DocProps) => (
         <div
-          key={doc.id}
+          key={doc.document.id}
           className="flex gap-2 items-center"
           draggable
           onDragOver={(event) => handleDragOver(event, doc)}
@@ -102,7 +104,7 @@ export default function MoveDocuments() {
           <Grip className="cursor-pointer" size={16} />
           <div className="flex items-center justify-between gap-4 text-sm cursor-pointer bg-secondary p-2 rounded mb-2">
             <div className="flex items-center gap-2">
-              <p>{doc.name}</p>
+              <p>{doc.document.name}</p>
             </div>
           </div>
         </div>
