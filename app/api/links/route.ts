@@ -2,6 +2,7 @@
 import { prisma } from "../../../lib/prisma";
 import { NextResponse } from "next/server";
 import { generateLink } from "../../../lib/utils";
+import axiosInstance from "../../../lib/axios";
 
 export async function GET(request: Request) {
   try {
@@ -19,17 +20,18 @@ export async function GET(request: Request) {
   }
 }
 
-
-
 export async function POST(request: Request) {
   try {
-    const body: { clusterId: string, username: string } = await request.json();
-    const { clusterId, username } = body;
+    const body: { clusterId: string; username: string; userId: string } =
+      await request.json();
+    const { clusterId, username, userId } = body;
 
     // username should be from clerk
+    // const cluster = await axiosInstance.get(`/api/clusters/${clusterId}`);
 
     const link = await prisma.link.create({
       data: {
+        id:clusterId,
         url: await generateLink(username, clusterId),
         cluster: {
           connect: {
@@ -38,6 +40,32 @@ export async function POST(request: Request) {
         },
       },
     });
+
+    if (!link) {
+      return NextResponse.json(
+        {
+          message: "Link creation failed!",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    const linkUser = await prisma.linkUser.create({
+      data: {
+        userId,
+        linkId: link.id,
+      },
+    });
+
+    if (!linkUser) {
+      return NextResponse.json(
+        { message: "linkUser creation failed!" },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { message: "Link Created!", link },
       { status: 201 }

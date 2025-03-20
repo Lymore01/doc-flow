@@ -307,9 +307,18 @@ export default function ClusterPage({
 
               <DialogFooter>
                 <div className="flex items-center justify-between w-full">
+                  <div className="flex gap-2 items-center">
+
                   <p className="text-sm" ref={linkref}>
                     docX.io/kellylimo
                   </p>
+                  <Button variant={"ghost"} onClick={()=>{
+                    router.push(clusterData?.cluster.link.url)
+                    
+                  }}>
+                    View Profile
+                  </Button>
+                  </div>
                   <Button
                     variant="secondary"
                     onClick={handleCopyToClipboard}

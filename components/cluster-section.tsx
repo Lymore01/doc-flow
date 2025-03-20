@@ -134,7 +134,7 @@ export default function ClusterSection({
     cluster.name.toLowerCase().includes(clusterName.toLowerCase())
   );
 
-  if (error) return <p>Error loading clusters.</p>;
+  
 
 
   return (
@@ -213,6 +213,7 @@ export default function ClusterSection({
       <div className="py-4 px-6 space-y-4">
         <h1>My Clusters</h1>
         {/* clusters */}
+        {error && <div className="p-4 flex items-center justify-center">Error Loading Clusters!</div>}
         <div className="space-y-2 ">
           {isLoading && (
             <div className="w-full py-2 rounded-lg hover:font-semibold cursor-pointer text-sm transition-all flex justify-between items-center">

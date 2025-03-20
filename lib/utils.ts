@@ -28,7 +28,7 @@ export function getFileIcon (file: any){
 };
 
 export async function generateLink(username: string, clusterId: string){
-  return `https://docx.io/${username}/${clusterId}`;
+  return `http://192.168.17.243:3000/d/${username}/${clusterId}`; //todo: update this after deployment
 }
 
 export async function getDocumentData({fileUrl}: {fileUrl: string}){

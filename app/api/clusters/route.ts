@@ -1,3 +1,4 @@
+import axiosInstance from "../../../lib/axios";
 import { prisma } from "../../../lib/prisma";
 import { NextResponse } from "next/server";
 
@@ -84,6 +85,38 @@ export async function POST(request: Request) {
         },
       },
     });
+
+    if(!cluster){
+      return NextResponse.json({
+        message: "Cluster not created!"
+      },
+    {
+      status: 400
+    })
+    }
+
+    // fetch username
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId
+      }
+    })
+
+    if(!user){
+      return NextResponse.json({
+        message: "User not found!"
+      },
+    {
+      status: 400
+    })
+    }
+
+    await axiosInstance.post("/api/links", {
+      clusterId: cluster.id,
+      username: user.name,
+      userId: userId
+    })
+
     return NextResponse.json(
       { message: "Cluster Created!", cluster },
       { status: 201 }
