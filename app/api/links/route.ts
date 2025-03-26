@@ -6,7 +6,31 @@ import axiosInstance from "../../../lib/axios";
 
 export async function GET(request: Request) {
   try {
-    const links = await prisma.link.findMany();
+    const url = new URL(request.url);
+    const userId = url.searchParams.get("userId");
+    if (!userId) {
+      return NextResponse.json(
+        { message: "userId is required!" },
+        { status: 400 }
+      );
+    }
+    const links = await prisma.link.findMany({
+      where: {
+        user: {
+          some: {
+            userId,
+          },
+        },
+      },
+      include:{
+        cluster:{
+          select:{
+            name:true
+          }
+        }
+      }
+    });
+
     return NextResponse.json(
       { message: "Links Fetched!", links },
       { status: 200 }
@@ -29,10 +53,36 @@ export async function POST(request: Request) {
     // username should be from clerk
     // const cluster = await axiosInstance.get(`/api/clusters/${clusterId}`);
 
+    // get short id
+    const response = await fetch(
+      `${process.env.TRACKIFY_BASE_URL}/api/shorten`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          original: await generateLink(username, clusterId),
+        }),
+        headers: {
+          "Content-Type": "application/json",
+          ...(process.env.TRACKIFY_API_KEY && {
+            "x-api-key": process.env.TRACKIFY_API_KEY,
+          }),
+          ...(process.env.TRACKIFY_ACCESS_TOKEN && {
+            Authorization: `Bearer ${process.env.TRACKIFY_ACCESS_TOKEN}`,
+          }),
+        },
+      }
+    );
+
+    const data: {
+      success: boolean;
+      shortUrl: string;
+    } = await response.json();
+
     const link = await prisma.link.create({
       data: {
-        id:clusterId,
+        id: clusterId,
         url: await generateLink(username, clusterId),
+        trackingId: data.success === true ? data.shortUrl : null,
         cluster: {
           connect: {
             id: clusterId,

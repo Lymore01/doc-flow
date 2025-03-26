@@ -114,7 +114,7 @@ export async function POST(request: Request) {
     await axiosInstance.post("/api/links", {
       clusterId: cluster.id,
       username: user.name,
-      userId: userId
+      userId: userId,
     })
 
     return NextResponse.json(

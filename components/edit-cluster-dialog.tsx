@@ -35,7 +35,7 @@ export default function EditClusterDialog({
         asChild
         className="relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0"
       >
-        <span className="flex gap-2 cursor-pointer">
+        <span className="flex gap-2 cursor-pointer items-center">
           <Edit size={16} />
           <span>Edit cluster</span>
         </span>

@@ -45,13 +45,14 @@ export async function PUT(
 ) {
   try {
     const id = params.id;
-    const { url } = await request.json();
+    const { profileDescription, backgroundColor } = await request.json();
     const link = await prisma.link.update({
       where: {
         id,
       },
       data: {
-        url,
+        profileDescription,
+        backgroundColor
       },
     });
     return NextResponse.json({ message: "Link Updated!", link }, { status: 200 });

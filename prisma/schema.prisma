@@ -73,11 +73,13 @@ model ClusterDocument {
 model Link {
     id String @id @default(uuid())
     url String
+    trackingId String? @unique
+    profileDescription String @default("👋 Welcome to my profile! Open to connections, collaboration, and new ideas. Let's make great things happen together. 🌟")
+    backgroundColor String @default("bg-amber-50")
     clusterId String @unique
     cluster Cluster @relation(fields: [clusterId], references: [id], onDelete: Cascade)
     createdAt DateTime @default(now())
     updatedAt   DateTime  @updatedAt
-
     user LinkUser[]
 }
 

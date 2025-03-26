@@ -28,7 +28,8 @@ export function getFileIcon (file: any){
 };
 
 export async function generateLink(username: string, clusterId: string){
-  return `http://192.168.17.243:3000/d/${username}/${clusterId}`; //todo: update this after deployment
+  const queryParam = encodeURIComponent(username);
+  return `http://192.168.25.176:3000/d/${queryParam}/${clusterId}`; //todo: update this after deployment to be dynamic
 }
 
 export async function getDocumentData({fileUrl}: {fileUrl: string}){

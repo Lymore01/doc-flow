@@ -19,42 +19,49 @@ export async function GET(request: Request) {
     }
 
     const userPageDetails = await prisma.linkUser.findMany({
-        where: {
-            linkId
+      where: {
+        linkId,
+      },
+      include: {
+        user: true,
+        link: {
+          select: {
+            profileDescription: true,
+            backgroundColor:true,
+            cluster: {
+              select: {
+                documents: {
+                  include: {
+                    document: true,
+                  },
+                },
+              },
+            },
+          },
         },
-        include: {
-            user:true,
-            link: {
-                select: {
-                    cluster: {
-                        select: {
-                            documents: {
-                                include: {
-                                    document:true
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    })
+      },
+    });
 
-    if(!userPageDetails){
-        return NextResponse.json({
-            message:"Fetching User details failed!"
-        }, {
-            status: 400
-        })
+    if (!userPageDetails) {
+      return NextResponse.json(
+        {
+          message: "Fetching User details failed!",
+        },
+        {
+          status: 400,
+        }
+      );
     }
 
-    return NextResponse.json({
+    return NextResponse.json(
+      {
         message: "User Page details Fetched!",
-        userPageDetails
-    }, {
-        status: 200
-    })
-
+        userPageDetails,
+      },
+      {
+        status: 200,
+      }
+    );
   } catch (error) {
     console.error("Error fetching user page:", error);
     return NextResponse.json(
