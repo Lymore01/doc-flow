@@ -23,6 +23,7 @@ export async function GET(request: Request) {
         },
       },
       include:{
+        Clicks:true,
         cluster:{
           select:{
             name:true

@@ -55,10 +55,11 @@ import { DialogTrigger } from "@radix-ui/react-dialog";
 import { useQuery } from "@tanstack/react-query";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { TrackerProps } from "../../../../components/user-tracker-table";
 
 interface LinkProps {
   id: string; // Unique identifier (UUID)
-  clickCount: number; // Number of clicks
+  Clicks: TrackerProps[]
   url: string; // Generated URL
   trackingId?: string; // Optional tracking ID
   profileDescription: string; // Profile description text
@@ -144,10 +145,10 @@ export default function MyLinks() {
       ),
     },
     {
-      accessorKey: "clickCount",
+      accessorKey: "Clicks",
       header: "Clicks",
       cell: ({ row }) => (
-        <div className="text-center">{row.getValue("clickCount")}</div>
+        <div className="text-center">{row.original.Clicks.length}</div>
       ),
     },
     {
@@ -181,7 +182,7 @@ export default function MyLinks() {
               <DropdownMenuSeparator />
               <DropdownMenuItem
                onClick={() => {
-                router.push(`/dashboard/analytics`)
+                router.push(`/dashboard/analytics?cluster=${row.original.cluster.name}`)
               }}
                 className="group"
               >

@@ -82,6 +82,18 @@ model Link {
     createdAt DateTime @default(now())
     updatedAt   DateTime  @updatedAt
     user LinkUser[]
+
+    Clicks Clicks[]
+}
+
+model Clicks {
+  id String @id @default(uuid())
+  ip        String?
+  country   String?
+  userAgent String?
+  link Link @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  linkId String
+  createdAt DateTime  @default(now())
 }
 
 model LinkUser{

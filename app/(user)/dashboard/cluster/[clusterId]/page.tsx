@@ -310,10 +310,10 @@ export default function ClusterPage({
                   <div className="flex gap-2 items-center">
 
                   <p className="text-sm w-[150px] md:w-[200px] truncate" ref={linkref}>
-                    {`https://42ae-41-89-16-2.ngrok-free.app/url/${clusterData?.cluster.link.trackingId}`}
+                    {`https://405f-41-89-16-2.ngrok-free.app/url/${clusterData?.cluster.link.trackingId}`}
                   </p>
                   <Button variant={"ghost"} onClick={()=>{
-                    router.push(`https://42ae-41-89-16-2.ngrok-free.app/url/${clusterData?.cluster.link.trackingId}`)
+                    router.push(`https://405f-41-89-16-2.ngrok-free.app/url/${clusterData?.cluster.link.trackingId}`)
                     // sample: https:trackify.io/url/czzxc
                   }}>
                     View Profile

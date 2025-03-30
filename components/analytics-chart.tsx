@@ -23,6 +23,7 @@ import { CopyIcon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useUser } from "@clerk/nextjs";
 import { Skeleton } from "./ui/skeleton";
+// import { TrackerProps } from "./user-tracker-table";
 
 export const description = "An interactive bar chart";
 
@@ -46,26 +47,32 @@ export function AnalyticsChart() {
     enabled: !!user?.id,
   });
 
-  React.useEffect(()=>{
-    if(linksData?.links){
-      setActiveCluster((linksData.links)[0].cluster.name)
+  React.useEffect(() => {
+    if (linksData?.links) {
+      setActiveCluster(linksData.links[0].cluster.name);
     }
-  }, [linksData])
+  }, [linksData]);
 
   // Get the filtered data based on the selected cluster
   const filteredData =
-  linksData?.links
-    .filter((link: { cluster: { name: string } }) => {
-      return link.cluster.name === activeCluster;
-    })
-    .map((link:{
-      createdAt:string;
-      clickCount: number
-    }) => ({
-      createdAt: link.createdAt,
-      clickCount: link.clickCount,
-    })) || [];
-
+    linksData?.links
+      .filter((link: { cluster: { name: string } }) => {
+        return link.cluster.name === activeCluster;
+      })
+      .map(
+        (link: {
+          createdAt: string;
+          Clicks: {
+            ip: string;
+            country: string;
+            userAgent: string;
+            createdAt: string;
+          }[];
+        }) => ({
+          createdAt: link.createdAt,
+          clickCount: link.Clicks.length,
+        })
+      ) || [];
 
   const chartConfig = {
     views: { label: "Link Clicks" },
@@ -89,7 +96,11 @@ export function AnalyticsChart() {
       <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
           <CardTitle className="flex gap-4 items-center w-full justify-between">
-            {isLoading ? <Skeleton className="h-8 w-32 rounded-md"/> : activeCluster}
+            {isLoading ? (
+              <Skeleton className="h-8 w-32 rounded-md" />
+            ) : (
+              activeCluster
+            )}
             <Button variant={"secondary"} className="bg-blue-600 text-white">
               <CopyIcon size={16} />
               <span>Copy Url</span>
@@ -101,13 +112,15 @@ export function AnalyticsChart() {
         </div>
         <div className="flex justify-center px-6 py-5 sm:py-6">
           <Selection
-            items={(linksData?.links || []).map((link: {
-              cluster:{
-                name:string
+            items={(linksData?.links || []).map(
+              (link: {
+                cluster: {
+                  name: string;
+                };
+              }) => {
+                return link.cluster.name;
               }
-            })=>{
-              return link.cluster.name
-            })}
+            )}
             onValueChange={(value: string) => {
               setActiveCluster(value);
             }}
@@ -123,7 +136,11 @@ export function AnalyticsChart() {
           <BarChart
             accessibilityLayer
             margin={{ left: 12, right: 12 }}
-            data={filteredData.length > 0 ? filteredData : [{ createdAt: "", clickCount: 0 }]}
+            data={
+              filteredData.length > 0
+                ? filteredData
+                : [{ createdAt: "", clickCount: 0 }]
+            }
           >
             <CartesianGrid vertical={false} />
             <XAxis

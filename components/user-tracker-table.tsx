@@ -37,12 +37,11 @@ import { useSearchParams } from "next/navigation";
 // todo: add location in future versions
 // location, ip, device type, click count, date/time of click
 
-interface TrackerProps {
-  location: string;
+export interface TrackerProps {
   ip: string;
-  deviceType: string;
-  clickCount: number;
-  dateTime: string;
+  country: string;
+  userAgent: string;
+  createdAt: string;
 }
 
 const columns: ColumnDef<TrackerProps>[] = [
@@ -52,46 +51,46 @@ const columns: ColumnDef<TrackerProps>[] = [
     cell: ({ row }) => <div className="font-medium">{row.getValue("ip")}</div>,
   },
   {
-    accessorKey: "location",
+    accessorKey: "country",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Location <ArrowUpDown />
+        Country <ArrowUpDown />
       </Button>
     ),
     cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("location")}</div>
+      <div className="font-medium">{row.getValue("country")}</div>
     ),
   },
   {
-    accessorKey: "deviceType",
+    accessorKey: "userAgent",
     header: "Device Type",
     cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("deviceType")}</div>
+      <div className="font-medium">{row.getValue("userAgent")}</div>
     ),
   },
+  // {
+  //   accessorKey: "clickCount",
+  //   header: ({ column }) => (
+  //     <Button
+  //       variant="ghost"
+  //       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+  //     >
+  //       Clicks <ArrowUpDown />
+  //     </Button>
+  //   ),
+  //   cell: ({ row }) => (
+  //     <div className="font-medium">{row.getValue("clickCount")}</div>
+  //   ),
+  // },
   {
-    accessorKey: "clickCount",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Clicks <ArrowUpDown />
-      </Button>
-    ),
-    cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("clickCount")}</div>
-    ),
-  },
-  {
-    accessorKey: "dateTime",
+    accessorKey: "createdAt",
     header: "Clicked At",
     cell: ({ row }) => (
       <div className="text-gray-500">
-        {new Date(row.getValue("dateTime")).toLocaleDateString()}
+        {new Date(row.getValue("createdAt")).toLocaleDateString()}
       </div>
     ),
   },
@@ -124,12 +123,16 @@ export default function UsersTrackerTable() {
     enabled: !!user?.id,
   });
 
-  const filteredData = linksData?.links.filter(
-   (link: { cluster: { name: string } }
-   )=>{
-      return link.cluster.name === cluster ? decodeURIComponent(cluster) : "" 
-   }
-  );
+  const filteredData = linksData?.links
+    .filter((link: { cluster: { name: string } }) => {
+      return link.cluster.name === cluster ? decodeURIComponent(cluster) : "";
+    })[0]
+    .Clicks.map((link: TrackerProps) => ({
+      ip: link.ip,
+      country: link.country,
+      userAgent: link.userAgent,
+      createdAt: link.createdAt,
+    }));
 
   const table = useReactTable({
     data: filteredData || [],
@@ -158,10 +161,10 @@ export default function UsersTrackerTable() {
             placeholder="Filter locations..."
             className="p-2 w-full sm:w-[300px] text-sm outline-none border-none"
             value={
-              (table.getColumn("location")?.getFilterValue() as string) ?? ""
+              (table.getColumn("country")?.getFilterValue() as string) ?? ""
             }
             onChange={(e) =>
-              table.getColumn("location")?.setFilterValue(e.target.value)
+              table.getColumn("country")?.setFilterValue(e.target.value)
             }
           />
           <div className="p-2">
