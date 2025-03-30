@@ -23,8 +23,6 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-
-import { TRACKING_DATA } from "../lib/constants";
 import { Input } from "./ui/input";
 import {
   DropdownMenu,
@@ -32,32 +30,50 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { useQuery } from "@tanstack/react-query";
+import { useUser } from "@clerk/nextjs";
+import { useSearchParams } from "next/navigation";
 
 // todo: add location in future versions
+// location, ip, device type, click count, date/time of click
 
 interface TrackerProps {
-  id: number;
-  email: string;
-  clicks: number;
+  location: string;
+  ip: string;
+  deviceType: string;
+  clickCount: number;
+  dateTime: string;
 }
 
 const columns: ColumnDef<TrackerProps>[] = [
   {
-    accessorKey: "email",
+    accessorKey: "ip",
+    header: "Ip",
+    cell: ({ row }) => <div className="font-medium">{row.getValue("ip")}</div>,
+  },
+  {
+    accessorKey: "location",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Email <ArrowUpDown />
+        Location <ArrowUpDown />
       </Button>
     ),
     cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("email")}</div>
+      <div className="font-medium">{row.getValue("location")}</div>
     ),
   },
   {
-    accessorKey: "clicks",
+    accessorKey: "deviceType",
+    header: "Device Type",
+    cell: ({ row }) => (
+      <div className="font-medium">{row.getValue("deviceType")}</div>
+    ),
+  },
+  {
+    accessorKey: "clickCount",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -67,12 +83,24 @@ const columns: ColumnDef<TrackerProps>[] = [
       </Button>
     ),
     cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("clicks")}</div>
+      <div className="font-medium">{row.getValue("clickCount")}</div>
+    ),
+  },
+  {
+    accessorKey: "dateTime",
+    header: "Clicked At",
+    cell: ({ row }) => (
+      <div className="text-gray-500">
+        {new Date(row.getValue("dateTime")).toLocaleDateString()}
+      </div>
     ),
   },
 ];
 
 export default function UsersTrackerTable() {
+  const { user } = useUser();
+  const searchParams = useSearchParams();
+  const cluster = searchParams.get("cluster");
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -81,8 +109,30 @@ export default function UsersTrackerTable() {
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
+  const { data: linksData } = useQuery({
+    queryKey: ["links"],
+    queryFn: async () => {
+      if (user?.id) {
+        const response = await fetch(`/api/links?userId=${user?.id}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch links.");
+        }
+        return response.json();
+      }
+      throw new Error("User ID is undefined.");
+    },
+    enabled: !!user?.id,
+  });
+
+  const filteredData = linksData?.links.filter(
+   (link: { cluster: { name: string } }
+   )=>{
+      return link.cluster.name === cluster ? decodeURIComponent(cluster) : "" 
+   }
+  );
+
   const table = useReactTable({
-    data: TRACKING_DATA,
+    data: filteredData || [],
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -105,11 +155,13 @@ export default function UsersTrackerTable() {
         <div className="flex justify-between items-center border rounded-lg focus-visible:ring-1 focus-visible:ring-ring">
           <Input
             type="text"
-            placeholder="Filter emails..."
+            placeholder="Filter locations..."
             className="p-2 w-full sm:w-[300px] text-sm outline-none border-none"
-            value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+            value={
+              (table.getColumn("location")?.getFilterValue() as string) ?? ""
+            }
             onChange={(e) =>
-              table.getColumn("email")?.setFilterValue(e.target.value)
+              table.getColumn("location")?.setFilterValue(e.target.value)
             }
           />
           <div className="p-2">
@@ -140,9 +192,9 @@ export default function UsersTrackerTable() {
         </DropdownMenu>
       </div>
       {/* table */}
-      <div className="p-4">
-        <div className="overflow-auto h-auto border rounded-lg">
-          <Table className="table-auto w-full min-w-max">
+      <div className="h-auto p-0 border rounded-lg">
+        <div className="overflow-x-auto">
+          <Table className="table-auto min-w-full">
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>

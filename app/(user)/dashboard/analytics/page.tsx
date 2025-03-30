@@ -33,10 +33,9 @@ export default function Analytics() {
         <AnalyticsChart />
         <div className="flex flex-col gap-4 w-full mt-4">
           <div>
-            <h1>Users</h1>
+            <h1>Clicks</h1>
             <p className="text-[0.8rem] text-muted-foreground">
-              Here&apos;s an overview of users who clicked your links for
-              cluster &quot;{activeCluster ?? "N/A"}&quot;
+              Here&apos;s an overview of performance metrics for &quot;{activeCluster ?? "N/A"}&quot;
             </p>
           </div>
           <UsersTrackerTable />

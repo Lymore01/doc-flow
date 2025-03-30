@@ -16,51 +16,56 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "./ui/chart";
-import { CLUSTERS } from "../lib/constants";
 import Selection from "./selection";
 import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 import { CopyIcon } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useUser } from "@clerk/nextjs";
+import { Skeleton } from "./ui/skeleton";
 
 export const description = "An interactive bar chart";
 
-const chartData: Record<string, { date: string; totalClicks: number }[]> = {
-  "Project Reports": [
-    { date: "2024-02-01", totalClicks: 200 },
-    { date: "2024-02-02", totalClicks: 250 },
-    { date: "2024-02-03", totalClicks: 310 },
-    { date: "2024-02-04", totalClicks: 260 },
-    { date: "2024-02-05", totalClicks: 300 },
-  ],
-  "Marketing Materials": [
-    { date: "2024-02-01", totalClicks: 150 },
-    { date: "2024-02-02", totalClicks: 180 },
-    { date: "2024-02-03", totalClicks: 220 },
-    { date: "2024-02-04", totalClicks: 200 },
-    { date: "2024-02-05", totalClicks: 250 },
-  ],
-  "Legal Documents": [
-    { date: "2024-02-01", totalClicks: 300 },
-    { date: "2024-02-02", totalClicks: 320 },
-    { date: "2024-02-03", totalClicks: 340 },
-    { date: "2024-02-04", totalClicks: 310 },
-    { date: "2024-02-05", totalClicks: 350 },
-  ],
-  "Client Proposals": [
-    { date: "2024-02-01", totalClicks: 30 },
-    { date: "2024-02-02", totalClicks: 32 },
-    { date: "2024-02-03", totalClicks: 390 },
-    { date: "2024-02-04", totalClicks: 400 },
-    { date: "2024-02-05", totalClicks: 380 },
-  ],
-};
-
 export function AnalyticsChart() {
+  const { user } = useUser();
   const router = useRouter();
-  const [activeCluster, setActiveCluster] = React.useState(CLUSTERS[0].name);
+  const [activeCluster, setActiveCluster] = React.useState("");
+
+  const { data: linksData, isLoading } = useQuery({
+    queryKey: ["links"],
+    queryFn: async () => {
+      if (user?.id) {
+        const response = await fetch(`/api/links?userId=${user?.id}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch links.");
+        }
+        return response.json();
+      }
+      throw new Error("User ID is undefined.");
+    },
+    enabled: !!user?.id,
+  });
+
+  React.useEffect(()=>{
+    if(linksData?.links){
+      setActiveCluster((linksData.links)[0].cluster.name)
+    }
+  }, [linksData])
 
   // Get the filtered data based on the selected cluster
-  const filteredData = chartData[activeCluster] || [];
+  const filteredData =
+  linksData?.links
+    .filter((link: { cluster: { name: string } }) => {
+      return link.cluster.name === activeCluster;
+    })
+    .map((link:{
+      createdAt:string;
+      clickCount: number
+    }) => ({
+      createdAt: link.createdAt,
+      clickCount: link.clickCount,
+    })) || [];
+
 
   const chartConfig = {
     views: { label: "Link Clicks" },
@@ -84,7 +89,7 @@ export function AnalyticsChart() {
       <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
           <CardTitle className="flex gap-4 items-center w-full justify-between">
-            {activeCluster}{" "}
+            {isLoading ? <Skeleton className="h-8 w-32 rounded-md"/> : activeCluster}
             <Button variant={"secondary"} className="bg-blue-600 text-white">
               <CopyIcon size={16} />
               <span>Copy Url</span>
@@ -96,7 +101,13 @@ export function AnalyticsChart() {
         </div>
         <div className="flex justify-center px-6 py-5 sm:py-6">
           <Selection
-            items={Object.keys(chartData)}
+            items={(linksData?.links || []).map((link: {
+              cluster:{
+                name:string
+              }
+            })=>{
+              return link.cluster.name
+            })}
             onValueChange={(value: string) => {
               setActiveCluster(value);
             }}
@@ -111,12 +122,12 @@ export function AnalyticsChart() {
         >
           <BarChart
             accessibilityLayer
-            data={filteredData}
             margin={{ left: 12, right: 12 }}
+            data={filteredData.length > 0 ? filteredData : [{ createdAt: "", clickCount: 0 }]}
           >
             <CartesianGrid vertical={false} />
             <XAxis
-              dataKey="date"
+              dataKey="createdAt"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
@@ -132,7 +143,7 @@ export function AnalyticsChart() {
               content={
                 <ChartTooltipContent
                   className="w-[150px]"
-                  nameKey="views"
+                  nameKey="clickCount"
                   labelFormatter={(value) =>
                     new Date(value).toLocaleDateString("en-US", {
                       month: "short",
@@ -143,7 +154,7 @@ export function AnalyticsChart() {
                 />
               }
             />
-            <Bar dataKey="totalClicks" fill={`var(--color-cluster)`} />
+            <Bar dataKey="clickCount" fill={`var(--color-cluster)`} />
           </BarChart>
         </ChartContainer>
       </CardContent>

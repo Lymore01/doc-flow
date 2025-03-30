@@ -72,6 +72,7 @@ model ClusterDocument {
 
 model Link {
     id String @id @default(uuid())
+    clickCount Int @default(0)
     url String
     trackingId String? @unique
     profileDescription String @default("👋 Welcome to my profile! Open to connections, collaboration, and new ideas. Let's make great things happen together. 🌟")
