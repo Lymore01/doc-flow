@@ -31,7 +31,7 @@ export default function Analytics() {
 
       <div className="flex-1 overflow-auto p-4">
         <AnalyticsChart />
-        <div className="flex flex-col gap-4 w-full mt-4">
+        <div className="flex flex-col gap-4 mt-4">
           <div>
             <h1>Clicks</h1>
             <p className="text-[0.8rem] text-muted-foreground">

@@ -59,7 +59,11 @@ export async function PUT(
       },
       data: {
         name,
-        clusterId,
+        clusters: {
+          connect: {
+            id: clusterId
+          }
+        },
         type,
         url,
       },

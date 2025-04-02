@@ -337,7 +337,7 @@ export default function UserPage() {
 
       <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
         {isLoading &&
-          Array.from([1, 2, 3, 4]).map((_, index) => (
+          Array.from({length: 4}).map((_, index) => (
             <div
               className="h-[200px] border p-2 flex flex-col gap-2 rounded-md items-center justify-center relative"
               key={index}

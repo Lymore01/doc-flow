@@ -31,8 +31,8 @@ export async function GET(request: Request) {
           clusterId,
         },
         include: {
-          document: true
-        }
+          document: true,
+        },
       });
       if (!documents) {
         return NextResponse.json(
@@ -45,12 +45,15 @@ export async function GET(request: Request) {
         );
       }
 
-      return NextResponse.json({
-        message: `Document from cluster ${clusterId} Fetched!`, documents
-      }, {
-        status: 200
-      })
-
+      return NextResponse.json(
+        {
+          message: `Document from cluster ${clusterId} Fetched!`,
+          documents,
+        },
+        {
+          status: 200,
+        }
+      );
     } else if (type) {
       filters["type"] = type as Type;
     } else if (userId) {
@@ -59,7 +62,17 @@ export async function GET(request: Request) {
           userId: userId,
         },
         include: {
-          documents: true,
+          documents: {
+            include: {
+              document: true,
+              cluster: {
+                select: {
+                  id:true,
+                  name: true,
+                },
+              },
+            },
+          },
           link: true,
         },
       });
@@ -68,7 +81,7 @@ export async function GET(request: Request) {
         {
           message: "Documents fetched!",
 
-          documents: clusters.map((cluster) => cluster.documents)[0],
+          documents: clusters.flatMap((cluster) => cluster.documents),
         },
         { status: 200 }
       );
@@ -175,4 +188,3 @@ export async function POST(request: Request) {
     );
   }
 }
-

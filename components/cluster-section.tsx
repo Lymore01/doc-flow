@@ -134,8 +134,6 @@ export default function ClusterSection({
     cluster.name.toLowerCase().includes(clusterName.toLowerCase())
   );
 
-  
-
 
   return (
     <div className="w-full md:w-1/4 max-h-screen">

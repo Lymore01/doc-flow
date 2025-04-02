@@ -59,7 +59,7 @@ import { TrackerProps } from "../../../../components/user-tracker-table";
 
 interface LinkProps {
   id: string; // Unique identifier (UUID)
-  Clicks: TrackerProps[]
+  Clicks: TrackerProps[];
   url: string; // Generated URL
   trackingId?: string; // Optional tracking ID
   profileDescription: string; // Profile description text
@@ -71,8 +71,6 @@ interface LinkProps {
     name: string; // Name of the cluster
   };
 }
-
-
 
 export default function MyLinks() {
   const { user } = useUser();
@@ -122,17 +120,22 @@ export default function MyLinks() {
       ),
     },
     {
-      accessorKey: "url",
+      accessorKey: "trackingId",
       header: "URL",
       cell: ({ row }) => (
         <a
-          href={row.getValue("url")}
+          href={`https://405f-41-89-16-2.ngrok-free.app/url/${row.getValue(
+            "trackingId"
+          )}`}
           target="_blank"
           rel="noopener noreferrer"
           className="text-blue-600 underline"
         >
-          {row.getValue("url")}
+          {`https://405f-41-89-16-2.ngrok-free.app/url/${row.getValue(
+            "trackingId"
+          )}`}
         </a>
+        // TODO: replace this with the actual trackify url
       ),
     },
     {
@@ -165,11 +168,11 @@ export default function MyLinks() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {/* Edit Cluster */}
-              <DropdownMenuItem asChild
-              onClick={() => {
-                router.push(`/dashboard/cluster/${row.original.clusterId}`)
-              }
-              }
+              <DropdownMenuItem
+                asChild
+                onClick={() => {
+                  router.push(`/dashboard/cluster/${row.original.clusterId}`);
+                }}
               >
                 {/* <EditClusterList /> */}
                 <Button variant="ghost" className="w-full flex gap-2 p-2">
@@ -177,13 +180,15 @@ export default function MyLinks() {
                   <span>View Cluster</span>
                 </Button>
               </DropdownMenuItem>
-  
+
               {/* Delete */}
               <DropdownMenuSeparator />
               <DropdownMenuItem
-               onClick={() => {
-                router.push(`/dashboard/analytics?cluster=${row.original.cluster.name}`)
-              }}
+                onClick={() => {
+                  router.push(
+                    `/dashboard/analytics?cluster=${row.original.cluster.name}`
+                  );
+                }}
                 className="group"
               >
                 <Button variant="ghost" className="w-full flex gap-2 p-2">

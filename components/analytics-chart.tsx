@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import * as React from "react";
@@ -17,12 +18,13 @@ import {
   ChartTooltipContent,
 } from "./ui/chart";
 import Selection from "./selection";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "./ui/button";
-import { CopyIcon } from "lucide-react";
+import { Check, CopyIcon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useUser } from "@clerk/nextjs";
 import { Skeleton } from "./ui/skeleton";
+import { toast } from "../hooks/use-toast";
 // import { TrackerProps } from "./user-tracker-table";
 
 export const description = "An interactive bar chart";
@@ -30,7 +32,10 @@ export const description = "An interactive bar chart";
 export function AnalyticsChart() {
   const { user } = useUser();
   const router = useRouter();
-  const [activeCluster, setActiveCluster] = React.useState("");
+  const searchParams = useSearchParams();
+  const cluster = searchParams.get("cluster");
+  const [activeCluster, setActiveCluster] = React.useState(cluster ?? "");
+  const [isCopied, setIsCopied] = React.useState<boolean>(false);
 
   const { data: linksData, isLoading } = useQuery({
     queryKey: ["links"],
@@ -46,12 +51,6 @@ export function AnalyticsChart() {
     },
     enabled: !!user?.id,
   });
-
-  React.useEffect(() => {
-    if (linksData?.links) {
-      setActiveCluster(linksData.links[0].cluster.name);
-    }
-  }, [linksData]);
 
   // Get the filtered data based on the selected cluster
   const filteredData =
@@ -91,6 +90,40 @@ export function AnalyticsChart() {
     }
   }, [activeCluster, router]);
 
+  React.useEffect(() => {
+    if (isCopied) {
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 3000);
+    }
+    return;
+  }, [isCopied]);
+
+  async function handleCopyToClipboard() {
+    try {
+      const link:{
+        url: string
+      }[] = linksData?.links?.filter(
+        (link: {
+          cluster: {
+            name: string;
+          };
+        }) => {
+          return link.cluster.name === activeCluster;
+        }
+      );
+      alert(link[0].url)
+      await navigator.clipboard.writeText(link[0].url); //! fix: only works on **https**
+      setIsCopied(true);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: `Failed to copy url: ${(error as Error).message}`,
+        variant: "destructive",
+      });
+    }
+  }
+
   return (
     <Card className="w-full">
       <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
@@ -101,9 +134,22 @@ export function AnalyticsChart() {
             ) : (
               activeCluster
             )}
-            <Button variant={"secondary"} className="bg-blue-600 text-white">
-              <CopyIcon size={16} />
-              <span>Copy Url</span>
+            <Button
+              variant={"secondary"}
+              className="bg-blue-600 text-white"
+              onClick={handleCopyToClipboard}
+            >
+              {isCopied ? (
+                <>
+                  <Check size={16} />
+                  <span>Copied</span>
+                </>
+              ) : (
+                <>
+                  <CopyIcon size={16} />
+                  <span>Copy Url</span>
+                </>
+              )}
             </Button>{" "}
           </CardTitle>
           <CardDescription>

@@ -44,7 +44,7 @@ export default function EditCluster({
           },
         });
         if (!response.ok) {
-          throw new Error("Failed to upload document");
+          throw new Error("Failed to edit cluster");
         }
         return response.json();
       } catch (error) {

@@ -411,15 +411,14 @@ export default function ClusterPage({
                         <EllipsisVertical size={16} />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent side="right">
-                        <EditDocument documentName={doc.document.name} />
+                        <EditDocument documentName={doc.document.name} documentId={doc.document.id} type={doc.document.type.toString()} url={doc.document.url} clusterId={clusterId as string}/>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
                           <DeleteDialog
                             entityName="Document"
                             entityId={doc.document.id}
                             onDelete={handleDocumentDelete}
-                            entityDescription={doc.document.name}
-                          />
+                            entityDescription={doc.document.name} isPendingDelete={false}                          />
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

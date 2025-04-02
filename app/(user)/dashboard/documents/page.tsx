@@ -17,9 +17,14 @@ import DocumentCard from "../../../../components/document-card";
 import { CLUSTERS, DOCS } from "../../../../lib/constants";
 import { useSidebar } from "../../../../components/ui/sidebar";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { useUser } from "@clerk/nextjs";
+import { formatDate } from "../../../../lib/utils";
+import { Skeleton } from "../../../../components/ui/skeleton";
 
 export default function MyDocuments() {
   const router = useRouter();
+  const { user } = useUser();
   const [documentName, setDocumentName] = useState<string>("");
   const [selectedFilter, setSelectedFilter] = useState<string>("");
 
@@ -29,24 +34,65 @@ export default function MyDocuments() {
     setSelectedFilter(filter);
   };
 
-  const filteredDocs = DOCS.filter((doc) => {
-    const matchesName = doc.name
-      .toLowerCase()
-      .includes(documentName.toLowerCase());
-
-    if (!selectedFilter || selectedFilter === "all") {
-      return matchesName;
-    }
-
-    if (selectedFilter === "recent") {
-      return (
-        matchesName &&
-        new Date(doc.date) >= new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-      );
-    }
-
-    return matchesName && doc.name.toLowerCase().endsWith(selectedFilter);
+  // fetch all docs
+  const { data: DOCS, isLoading } = useQuery({
+    queryKey: ["viewDocuments", user?.id],
+    queryFn: async () => {
+      if (user?.id) {
+        const response = await fetch(`/api/documents?userId=${user.id}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch document.");
+        }
+        return response.json();
+      }
+      throw new Error("User ID is undefined.");
+    },
+    enabled: !!user?.id,
   });
+
+  const filteredDocs =
+    DOCS?.documents.filter(
+      (doc: {
+        cluster: {
+          name: string;
+          id: string;
+        };
+        document: {
+          id: string;
+          name: string;
+          type: string;
+          createdAt: string;
+        };
+      }) => {
+        const matchesName = doc.document.name
+          .toLowerCase()
+          .includes(documentName.toLowerCase());
+
+        if (!selectedFilter || selectedFilter === "all") {
+          return matchesName;
+        }
+
+        function isDocumentRecent(createdAt: string) {
+          const formattedCreatedAt = formatDate(
+            new Date(createdAt).toISOString()
+          );
+          const oneWeekAgo = formatDate(
+            new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+          );
+
+          return formattedCreatedAt >= oneWeekAgo;
+        }
+
+        if (selectedFilter === "recent") {
+          return matchesName && isDocumentRecent(doc.document.createdAt);
+        }
+
+        return (
+          matchesName &&
+          doc.document.name.toLowerCase().endsWith(selectedFilter)
+        );
+      }
+    ) || [];
 
   useEffect(() => {
     if (selectedFilter) {
@@ -64,14 +110,13 @@ export default function MyDocuments() {
         {/* Header */}
         <header className="flex flex-wrap justify-between items-center py-4 px-4 sm:px-6">
           <div>
-          <h1 className="text-lg font-semibold">My Documents</h1>
-          <p className="text-[0.8rem] text-muted-foreground">
-            Here&apos;s a list of all documents you have uploaded
-          </p>
+            <h1 className="text-lg font-semibold">My Documents</h1>
+            <p className="text-[0.8rem] text-muted-foreground">
+              Here&apos;s a list of all documents you have uploaded
+            </p>
           </div>
 
           <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto mt-3 sm:mt-0">
-
             <div className="flex items-center border rounded-lg focus-within:ring-2  w-full sm:w-auto">
               <Input
                 placeholder="Search documents..."
@@ -112,6 +157,9 @@ export default function MyDocuments() {
                 <DropdownMenuItem onClick={() => handleFilterSelect("txt")}>
                   Text Files
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleFilterSelect("pptx")}>
+                  Powerpoint
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => handleFilterSelect("recent")}>
                   Recently Uploaded
@@ -127,19 +175,71 @@ export default function MyDocuments() {
         {/* Document Grid */}
         <div className="flex-1 overflow-y-auto p-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
-            {filteredDocs.length === 0 && (
-              <span className="text-gray-500">No results found</span>
+            {isLoading ? (
+              Array.from({length: 3}).map((_, idx)=>(
+              <div className="rounded-md w-full h-[200px] flex flex-col border border-gray-200 bg-white shadow-sm" key={idx}>
+                {/* Header Section */}
+                <div className="h-1/4 flex items-center justify-center bg-secondary rounded-t-md p-4">
+                  <Skeleton className="w-28 h-6" />
+                </div>
+
+                <Separator />
+
+                <div className="flex flex-1 flex-col gap-4 p-4">
+                  <Skeleton className="w-3/4 h-[80px] rounded-lg" />
+                  <div className="flex justify-end items-end gap-2">
+                    <Skeleton className="w-12 h-8 rounded-lg" />
+                    <Skeleton className="w-8 h-8 rounded-lg" />
+                    <Skeleton className="w-8 h-8 rounded-lg" />
+                    <Skeleton className="w-8 h-8 rounded-lg" />
+                  </div>
+                </div>
+              </div>
+
+              ))
+            ) : (
+              filteredDocs?.length === 0 && (
+                <span className="text-gray-500">No results found</span>
+              )
             )}
-            {filteredDocs.map((doc) => (
-              <DocumentCard
-                name={doc.name}
-                type={doc.name.split(".").pop()?.toLowerCase()}
-                size="1.2MB"
-                date="Feb 10, 2025"
-                url="https://example.com/project-details.pdf"
-                key={doc.id}
-              />
-            ))}
+            {filteredDocs.map(
+              (doc: {
+                cluster: {
+                  id: string;
+                  name: string;
+                };
+                document: {
+                  id: string;
+                  name: string;
+                  type: string;
+                  createdAt: string;
+                  url: string;
+                };
+              }) => (
+                <DocumentCard
+                  id={doc.document.id}
+                  name={doc.document.name}
+                  type={doc.document.name.split(".").pop()?.toLowerCase()}
+                  size="1.2MB"
+                  date={doc.document.createdAt}
+                  url={doc.document.url}
+                  key={doc.document.id}
+                  cluster={doc.cluster?.name}
+                  clusterId={doc.cluster.id}
+                  clusters={DOCS?.documents.map(
+                    (doc: {
+                      clusterId: string;
+                      cluster: {
+                        name: string;
+                      };
+                    }) => ({
+                      clusterId: doc.clusterId,
+                      clusterName: doc.cluster.name,
+                    })
+                  )}
+                />
+              )
+            )}
           </div>
         </div>
       </div>

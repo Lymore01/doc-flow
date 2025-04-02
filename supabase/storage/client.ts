@@ -60,6 +60,32 @@ export async function deleteDocument({ fileUrl }: { fileUrl: string }) {
   return { message: "File deleted successfully!", data, error: "" };
 }
 
+// download file
+export async function downloadDocument({ fileUrl }: { fileUrl: string }){
+  const storage = getStorage();
+
+  const { bucketName, path } = await getDocumentData({ fileUrl });
+
+  const { data, error } = await storage.from(bucketName).download(path);
+
+  if (error) throw error;
+
+  // Convert the file data to a Blob for downloading
+  const blob = new Blob([data], { type: data.type });
+  const url = URL.createObjectURL(blob);
+
+  // Create a temporary link to trigger the download
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = path.split("/").pop() || "default_filename";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  console.log("File downloaded successfully!");
+ 
+}
+
 //?  uncomment this function when the update document feature is needed
 // export async function updateDocument({
 //   fileUrl,
